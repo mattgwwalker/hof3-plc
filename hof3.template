@@ -1,6 +1,8 @@
 //Analog Input Setup
-INCLUDE "{ROOT}\modules\ISOP1_8channel_4_20mA_xxxx_ch01_ch08.bas"
-INCLUDE "{ROOT}\modules\ISQP1_4channel_4_20mA_xxxx_ch09_ch10.bas"
+INCLUDE "{ROOT}\modules\ISOP1_8channel_4_20mA_0001_ch01_ch08.bas"
+//INCLUDE "{ROOT}\modules\ISOP1_8channel_4_20mA_0003_ch01_ch08.bas"
+INCLUDE "{ROOT}\modules\ISQP1_4channel_4_20mA_0002_ch09_ch10.bas"
+INCLUDE "{ROOT}\AI\FT01_CH.bas" //CH1
 INCLUDE "{ROOT}\AI\FT02_CH.bas" //CH2
 INCLUDE "{ROOT}\AI\FT03_CH.bas" //CH3
 INCLUDE "{ROOT}\AI\TT01_CH.bas" //CH4
@@ -8,6 +10,7 @@ INCLUDE "{ROOT}\AI\PT01_CH.bas" //CH5
 INCLUDE "{ROOT}\AI\PT02_CH.bas" //CH6
 INCLUDE "{ROOT}\AI\LT01_CH.bas" //CH7
 INCLUDE "{ROOT}\AI\PT04_CH.bas" //CH8
+INCLUDE "{ROOT}\AI\PH01_CH.bas" //CH9
 INCLUDE "{ROOT}\AI\PT03_CH.bas" //CH10
 
 //Registers
