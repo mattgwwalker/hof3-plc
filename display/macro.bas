@@ -1,5 +1,5 @@
 CONST DISPLAY_STEP_MIN = 1
-CONST DISPLAY_STEP_MAX = 9
+CONST DISPLAY_STEP_MAX = 11
 
 //Display 
 IF (|DOWN_BUTTON = ON) THEN
@@ -65,50 +65,62 @@ select &tempStepNum
      &displayFD100StepNumber = &fd100StepNum // A copy so that we know what we're currently displaying
    endif
    WRITE 2 fd100MsgArray[&displayFD100StepNumber]
+
+  case  2: // FT01
+   WRITE 1 ""
+   WRITE 1 "FT01 (l/h)"
+   &Display_2DP = &FT01_100
+   &DATA_SOURCE_DISPLAY2 = ADDR(&Display_2DP)
     
-  case  2: // FT02
+  case  3: // FT02
    WRITE 1 ""
    WRITE 1 "FT02 (l/h)"
    &Display_2DP = &FT02_100
    &DATA_SOURCE_DISPLAY2 = ADDR(&Display_2DP)
 
-  case  3: // FT03
+  case  4: // FT03
    WRITE 1 ""
    WRITE 1 "FT03 (l/h)"
    &Display_2DP = &FT03_100
    &DATA_SOURCE_DISPLAY2 = ADDR(&Display_2DP)
 
-  case  4: // LT01
+  case  5: // LT01
    WRITE 1 ""
    WRITE 1 "LT01 (%)"
    &Display_2DP = &LT01_100
    &DATA_SOURCE_DISPLAY2 = ADDR(&Display_2DP)
 
-  case  5: // TT01
+  case  6: // TT01
    WRITE 1 ""
    WRITE 1 "TT01 (deg C)"
    &Display_2DP = &TT01_100
    &DATA_SOURCE_DISPLAY2 = ADDR(&Display_2DP)
 
-  case  6: // PT01
+  case  7: // PT01
    WRITE 1 ""
    WRITE 1 "PT01 (bar)"
    &Display_3DP = &PT01_1000
    &DATA_SOURCE_DISPLAY2 = ADDR(&Display_3DP)
 
-  case  7: // PT02
+  case  8: // PT02
    WRITE 1 ""
    WRITE 1 "PT02 (bar)"
    &Display_3DP = &PT02_1000
    &DATA_SOURCE_DISPLAY2 = ADDR(&Display_3DP)
 
-  case  8: // Step details
+  case  9: // PH01
+   WRITE 1 ""
+   WRITE 1 "PH01"
+   &Display_2DP = &PH01_100
+   &DATA_SOURCE_DISPLAY2 = ADDR(&Display_2DP)
+
+  case 10: // Step details
    WRITE 1 "" // Clear both lines as otherwise the screen update takes extra time
    WRITE 2 ""
    &DATA_SOURCE_DISPLAY1 = ADDR(&fd100StepNum)
    &DATA_SOURCE_DISPLAY2 = ADDR(&fd100StepTimeAcc)
 
-  case 9:
+  case 11:
    WRITE 2 ""
    WRITE 2 "CPU Usage "+&CPU_LOADING+"%"
    &DATA_SOURCE_DISPLAY1 = 0 // Clear other line
