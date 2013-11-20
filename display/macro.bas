@@ -1,5 +1,5 @@
 CONST DISPLAY_STEP_MIN = 1
-CONST DISPLAY_STEP_MAX = 11
+CONST DISPLAY_STEP_MAX = 13
 
 //Display 
 IF (|DOWN_BUTTON = ON) THEN
@@ -85,10 +85,16 @@ select &tempStepNum
    &DATA_SOURCE_DISPLAY2 = ADDR(&Display_2DP)
 
   case  5: // LT01
-   WRITE 1 ""
-   WRITE 1 "LT01 (%)"
-   &Display_2DP = &LT01_100
-   &DATA_SOURCE_DISPLAY2 = ADDR(&Display_2DP)
+   IF &LT01_100 > 300 THEN
+     WRITE 1 ""
+     WRITE 1 "LT01 (%)"
+     &Display_2DP = &LT01_100
+     &DATA_SOURCE_DISPLAY2 = ADDR(&Display_2DP)
+   ELSE
+     &DATA_SOURCE_DISPLAY1 = 0
+     WRITE 2 ""
+     WRITE 2 "LT01 below 3%"
+   ENDIF
 
   case  6: // TT01
    WRITE 1 ""
@@ -108,19 +114,32 @@ select &tempStepNum
    &Display_3DP = &PT02_1000
    &DATA_SOURCE_DISPLAY2 = ADDR(&Display_3DP)
 
-  case  9: // PH01
+  case  9: // PT03
+   WRITE 1 ""
+   WRITE 1 "PT03 (bar)"
+   &Display_3DP = &PT03_1000
+   &DATA_SOURCE_DISPLAY2 = ADDR(&Display_3DP)
+
+  case  10: // PT04
+   WRITE 1 ""
+   WRITE 1 "PT04 (bar)"
+   &Display_3DP = &PT04_1000
+   &DATA_SOURCE_DISPLAY2 = ADDR(&Display_3DP)
+
+
+  case  11: // PH01
    WRITE 1 ""
    WRITE 1 "PH01"
    &Display_2DP = &PH01_100
    &DATA_SOURCE_DISPLAY2 = ADDR(&Display_2DP)
 
-  case 10: // Step details
+  case 12: // Step details
    WRITE 1 "" // Clear both lines as otherwise the screen update takes extra time
    WRITE 2 ""
    &DATA_SOURCE_DISPLAY1 = ADDR(&fd100StepNum)
    &DATA_SOURCE_DISPLAY2 = ADDR(&fd100StepTimeAcc)
 
-  case 11:
+  case 13:
    WRITE 2 ""
    WRITE 2 "CPU Usage "+&CPU_LOADING+"%"
    &DATA_SOURCE_DISPLAY1 = 0 // Clear other line

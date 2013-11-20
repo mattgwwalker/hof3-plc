@@ -1,7 +1,7 @@
 // PH01 - pH Meter
 
-CONST PH01_EUMax = 12.00 // pH
-CONST PH01_EUMin = 2.00  // pH
+CONST PH01_EUMax = 14.00 // pH
+CONST PH01_EUMin = 0.00  // pH
 CONST PH01_EUMultiplier = 100.0
 
 MEM &SCALE_FACTOR_CH9 = CH09_CalScaleFactor / CH09_CalScaledMax * (PH01_EUMax - PH01_EUMin) * PH01_EUMultiplier
