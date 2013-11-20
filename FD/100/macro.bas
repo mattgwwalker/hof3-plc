@@ -1,8 +1,22 @@
-//FD100 Main Sequence
+// FD100 Main Sequence
 
-//Clear Sequence Outputs... these are then set on below
-&fd100ProgOut01 = 0
-&fd100ProgOut02 = 0
+// This sequence is responsible for the main state of the plant.  For
+// example: mixing, recirculating, concentrating.
+
+// When the plant is in the Recirc state, both the retentate and
+// permeate lines are returned to the main tank.  This state fills the
+// membrane and associated piping with liquid.
+
+// This file is broken up into four main parts: initialisation, the
+// step transitions, the one-shot actions, and the step actions that
+// happen every scan.
+
+// Clear Sequence Outputs.  These registers are used to hold bit-wise
+// values such as whether pump PP01 should be turned on.  By setting
+// these registers to zero, all those bits are cleared in each scan,
+// meaning that the code below need only set each bit on if required.
+// The declaration for each bit can be found in _USER_MEMORY.bas.
+&fd100ProgOut01 = 0 &fd100ProgOut02 = 0
 
 //Create ONESHOT function for PB01... which is used to start sequence
 IF (|PB01_I = ON) THEN
@@ -93,7 +107,11 @@ endsel
  
 &fd100cmd = fd100cmd_noAction
 
-//****Step Transisitions
+
+// ******************
+// Step Transisitions
+// ******************
+
 &tempStepNum = &fd100StepNum
 select &tempStepNum
  case  fd100StepNum_RESET: //***Powerup and Reset State
@@ -243,7 +261,15 @@ select &tempStepNum
   &tempStepNum = fd100StepNum_RESET
 endsel
 
-//*****Step ONS Actions
+
+
+// **********************
+// One-shot (ONS) Actions
+// **********************
+
+// These actions only occur as the state is changing.  They do not
+// occur every scan.
+
 IF (&tempStepNum != &fd100StepNum) THEN
  &fd100StepNum = &tempStepNum
  &fd100StepTimeAcc_s10 = 0
@@ -282,6 +308,7 @@ IF (&tempStepNum != &fd100StepNum) THEN
    endif   
 
   case fd100StepNum_RECIRC: //Production or CIP Chemical Wash - Recirc through filter
+   // Set up the PID controllers for Recirc 
    &DPC01sp=&DPC01sp01
    &PC05sp=&PC05sp01
    &PC03sp=&PC03sp01
@@ -317,7 +344,9 @@ IF (&tempStepNum != &fd100StepNum) THEN
  endsel
 ENDIF
 
-//*****Step Actions
+// ************
+// Step Actions
+// ************
 select &tempStepNum
  case fd100StepNum_RESET: //Powerup and Reset State
   &V1x_last = 0.0
@@ -480,7 +509,11 @@ if (&fd100TimeAcc_RECIRC_m > 32000) then
   &fd100TimeAcc_RECIRC_m = 32000
 endif
 
-//*****Fault Monitor Logic
+
+// *******************
+// Fault Monitor Logic
+// *******************
+
 //Fault Checks
 &OPmsg = &fd100Faultcmd_resetMsg
 if (((|fd100Fault_PB01toRestart = ON)\

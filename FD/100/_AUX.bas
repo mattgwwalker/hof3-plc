@@ -17,15 +17,15 @@ CONST fd100StepNum_DRAIN = 10
 DIM fd100MsgArray[] = \
 ["     Reset     ",\
 "Awaiting command",\
-"               Press the green button to start concentrating product               ",\
+"               Press the green button to start               ",\
 "    Waiting     ",\
-" Fill Feedtank  ",\
-"       Mix      ",\
-"     Recirc     ",\
-"               Concentrating product               ",\
-" Empty To Site  ",\
-" Empty To Drain ",\
-"     Drain      ",\
+"Filling Feedtank",\
+"     Mixing     ",\
+"  Recirculating ",\
+"  Concentrating ",\
+"Emptying to site",\
+"Pumping to drain",\
+"    Draining    ",\
 "",\
 ""]
 
