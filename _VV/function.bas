@@ -25,23 +25,27 @@
 //
 
 
-// An interlock has to be on in order to allow the feature to be accessible.  
-// For example, to turn a valve to automatic, the interlock for automatic has
-// to be on.
 
-// The interlocks seem to be a way of quickly checking if that action is 
-// available.  So if the interlock for manual is on, you can select manual mode.
+// mot stands for "Minimum on Time".  This is the minimum time that a fault
+// is latched up.
+CONST VV_FAULT_MINIMUM_ON_TIME = 500 // ms
+
 
 VV:
-  // ??? If manual mode is allowed and we're in manual mode then turn on the 
-  // interlock for automatic, otherwise turn it off 
+  // *** Interlocks ***
+
+  // An interlock has to be on in order to allow the feature to be accessible.  
+  // For example, to turn a valve to automatic, the interlock for automatic has
+  // to be on.
+
+  // The interlocks are a way of quickly checking if that action is available.
+  // So if the interlock for manual is on, you can select manual mode.
   IF ((|VVmanEnable = ON) AND (|VVman = ON)) THEN
     |VVautoInterlock = ON
   ELSE
     |VVautoInterlock = OFF 
   ENDIF
     
-  // 
   IF ((|VVmanEnable = ON) AND (|VVman = OFF)) THEN
     |VVmanInterlock = ON
   ELSE
@@ -61,7 +65,10 @@ VV:
   ENDIF
 
 
-  //cmd 0=none 1=auto 2=manual 3=manualOff 4=manualOn
+  // *** Commands *** 
+
+  // Handle the actioning of a command.
+  // 0=none 1=auto 2=manual 3=manualOff 4=manualOn
   SELECT &VVcmd
     CASE 0:
       //No action
@@ -114,6 +121,7 @@ VV:
 
   ENDSEL
 
+  // Handle the delaying of automatic changes to the item's state.
   IF (|VVautoOut = ON) THEN
     IF ((&VVdelayTimerEngPre = 0) OR (|VVdelayedAutoOut = ON) OR (|VVout = ON)) THEN
       |VVdelayedAutoOut = ON
@@ -145,6 +153,10 @@ VV:
     |VVman = OFF
   ENDIF
 
+
+  // Fault checking: if the valve is being asked to go to one state, but it's 
+  // not in that state, check how long has this benn been going on.  If it's
+  // longer than the item's preset then this is a fault. 
   IF (|VVout = ON) THEN
     IF (|VVdelayedOut = ON) THEN
       IF (&VVfaultTimerAcc >= &VVfaultTimerEngPre) THEN
@@ -188,12 +200,14 @@ VV:
       |VVfault = OFF
     ENDIF
   ENDIF
-   
+
+  // If the item is in a fault state then latch up the fault for a minimum time.   
   IF (|VVfault = ON) THEN
     |VVmotFault = ON
   ENDIF
     
-  IF (|VVmotFault = ON) AND (&VVmotFaultTimerAcc < 500)  THEN
+  // Handle the timer for the minimum on time. 
+  IF (|VVmotFault = ON) AND (&VVmotFaultTimerAcc < VV_FAULT_MINIMUM_ON_TIME) THEN
     &VVmotFaultTimerAcc = &VVmotFaultTimerAcc + &lastScanTimeFast
   ELSIF (|VVfault = OFF) THEN
     |VVmotFault = OFF
