@@ -1,7 +1,8 @@
-CONST DISPLAY_STEP_MIN = 1
-CONST DISPLAY_STEP_MAX = 13
+CONST DISPLAY_STEP_MIN = 1   // The case number of the first display page
+CONST DISPLAY_STEP_MAX = 13  // The case number of the last display page 
 
-//Display 
+// Handle the pressing of the Down button.
+// Once it has been pressed for two scans, both down1 and down2 will be set
 IF (|DOWN_BUTTON = ON) THEN
  IF (|down1 = OFF) THEN
   |down1 = ON
@@ -15,6 +16,9 @@ ELSE
   |down2 = OFF
 ENDIF
 
+
+// Handle the pressing of the Up button.
+// Once it has been pressed for two scans, both up1 and up2 will be set
 IF (|UP_BUTTON = ON) THEN
  IF (|up1 = OFF) THEN
   |up1 = ON
@@ -28,36 +32,38 @@ ELSE
   |up2 = OFF
 ENDIF
 
+
+
 &tempStepNum = &displayStepNumber
 
 // Check to see if the state should be changed
 select &tempStepNum
-case  0: //Powerup and Reset State
- IF (&upDownButtonState=noAction) THEN
-  &tempStepNum = DISPLAY_STEP_MIN
- ENDIF
+  case  0: //Powerup and Reset State
+    if (&upDownButtonState=noAction) then
+      &tempStepNum = DISPLAY_STEP_MIN
+    endif
 
-default: // All other display states
- // Check to see if the up or down buttons have been pressed
- IF (&upDownButtonState=UpArrowPressed) THEN
-  &tempStepNum = &tempStepNum - 1
- ELSIF (&upDownButtonState=DownArrowPressed) THEN
-  &tempStepNum = &tempStepNum + 1
- ENDIF
+  default: // All other display states
+    // Check to see if the up or down buttons have been pressed
+    IF (&upDownButtonState=UpArrowPressed) THEN
+      &tempStepNum = &tempStepNum - 1
+    ELSIF (&upDownButtonState=DownArrowPressed) THEN
+      &tempStepNum = &tempStepNum + 1
+    ENDIF
  
- // Check to ensure the new state is within bounds
- IF &tempStepNum > DISPLAY_STEP_MAX THEN
-  &tempStepNum = DISPLAY_STEP_MIN
- ELSIF &tempStepNum < DISPLAY_STEP_MIN THEN
-  &tempStepNum = DISPLAY_STEP_MAX
- ENDIF 
+    // Check to ensure the new state is within bounds
+    IF &tempStepNum > DISPLAY_STEP_MAX THEN
+      &tempStepNum = DISPLAY_STEP_MIN
+    ELSIF &tempStepNum < DISPLAY_STEP_MIN THEN
+      &tempStepNum = DISPLAY_STEP_MAX
+    ENDIF 
 endsel
 
 
 select &tempStepNum
   case  0: //Powerup and Reset State
 
-  case  1: // Description of current state
+  case  1: // Description of the plant's current state
    if &tempStepNum != &displayStepNumber or &fd100StepNum != &displayFD100StepNumber then
      &DATA_SOURCE_DISPLAY1 = 0 // Clear the top line
      &DATA_SOURCE_DISPLAY2 = 0 // Clear the second line
@@ -93,7 +99,7 @@ select &tempStepNum
    ELSE
      &DATA_SOURCE_DISPLAY1 = 0
      WRITE 2 ""
-     WRITE 2 "LT01 below 3%"
+     WRITE 2 "LT01 is below 3%"
    ENDIF
 
   case  6: // TT01
