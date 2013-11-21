@@ -6,6 +6,10 @@
 // flows from the top or from the bottom of the membrane) during Recirculation 
 // and Draining, and for the timing of backwashes.
 
+// The state names are, for example, "Recirc Bottom" which indicates that the
+// membrane flow is from the bottom.  The name "Recirc to Top" indicates that
+// we are transitioning to the state "Recirc Top", i.e. the flow will become 
+// from the top.
 
 // The length of time to freeze the PID controllers after a direction change
 CONST fd101StepTimeAcc_FREEZE_PIDS_m = 0
@@ -234,31 +238,38 @@ select &tempStepNum
       &fd101DirTimeAcc_s10 = &fd101DirTimeAcc_s10 + &lastScanTimeShort
       &fd101BWTimeAcc_s10 = &fd101BWTimeAcc_s10 + &lastScanTimeShort
       &fd101StepTimeAcc_s10 = &fd101StepTimeAcc_s10 + &lastScanTimeShort
-     endif 
-     |fd101_IV05=ON // ON = Allow flow into membranes
-     |fd101_IV06=ON // ON = Close the bypass
-     // Freeze the PID controllers for the first few seconds of this state
-     if ((&fd101StepTimeAcc_m <= fd101StepTimeAcc_FREEZE_PIDS_m) \
-     and (&fd101StepTimeAcc_s10 < fd101StepTimeAcc_FREEZE_PIDS_s10)) then       
-       |fd101_DPC01pidHold=ON
-       |fd101_PC01pidHold=ON
-       |fd101_PC05pidHold=ON  
-       |fd101_RC01pidHold=ON
-     endif  
+    endif 
+    // Requires: IV05 delay on < IV06 delay on
+    // Requires: time for this state > IV05 delay on + IV06 delay on (DV0{1,2,3} aren't changing)
+    |fd101_IV05=ON // ON = Allow flow into membranes
+    |fd101_IV06=ON // ON = Close the bypass
+    // Freeze the PID controllers for the first few seconds of this state
+    if ((&fd101StepTimeAcc_m <= fd101StepTimeAcc_FREEZE_PIDS_m) \
+    and (&fd101StepTimeAcc_s10 < fd101StepTimeAcc_FREEZE_PIDS_s10)) then       
+      |fd101_DPC01pidHold=ON
+      |fd101_PC01pidHold=ON
+      |fd101_PC05pidHold=ON  
+      |fd101_RC01pidHold=ON
+    endif  
  
 
   case  fd101StepNum_RECIRC_TO_BOTTOM:
-    // In this state we're changing to a membrane flow from the bottom
+    // In this state we're changing to a membrane flow that will be from the bottom
     // Reset the direction change timer to zero
     &fd101DirTimeAcc_s10 = 0
     &fd101DirTimeAcc_m = 0
     &fd101StepTimeAcc_s10 = &fd101StepTimeAcc_s10 + &lastScanTimeShort
     // Change the direction of the flow in the membrane
+    // It's critical that each of the valves' delay timers are correctly set
+    // and that the state has enough time to complete
+    // Requires: IV06 delay off < IV05 delay off < DV0(1,2,3} delay on
+    // Requires: time for this state > IV06 delay off + IV05 delay off + DV0{1,2,3} delay on
+    |fd101_IV06=OFF // OFF = Open the bypass
+    |fd101_IV05=OFF // OFF = No flow to membranes  
     // ON = flow from the bottom
     |fd101_DV01=ON
     |fd101_DV02=ON
     |fd101_DV03=ON
-    |fd101_IV05=ON  
     // Freeze the PID Controllers for the duration of this state
     |fd101_DPC01pidHold=ON
     |fd101_PC01pidHold=ON
@@ -273,11 +284,13 @@ select &tempStepNum
       &fd101BWTimeAcc_s10 = &fd101BWTimeAcc_s10 + &lastScanTimeShort
       &fd101StepTimeAcc_s10 = &fd101StepTimeAcc_s10 + &lastScanTimeShort
     endif 
+    // Requires: IV05 delay on < IV06 delay on
+    // Requires: time for this state > IV05 delay on + IV06 delay on (DV0{1,2,3} aren't changing)
+    |fd101_IV05=ON // ON = flow to the membranes
+    |fd101_IV06=ON // ON = Bypass valve closed
     |fd101_DV01=ON // ON = flow from the bottom
     |fd101_DV02=ON
     |fd101_DV03=ON
-    |fd101_IV05=ON
-    |fd101_IV06=ON // ON = Bypass valve closed
     // Freeze the PID controllers for the first few seconds of this state
     if ((&fd101StepTimeAcc_m <= fd101StepTimeAcc_FREEZE_PIDS_m) \
     and (&fd101StepTimeAcc_s10 < fd101StepTimeAcc_FREEZE_PIDS_s10)) then     
@@ -289,14 +302,22 @@ select &tempStepNum
 
 
   case  fd101StepNum_RECIRC_TO_TOP:
-    // In this state we're changing to a membrane flow from the top
+    // In this state we're changing to a membrane flow that will be from the top
     // Reset the direction change timer to zero
     &fd101DirTimeAcc_s10 = 0
     &fd101DirTimeAcc_m = 0
     &fd101StepTimeAcc_s10 = &fd101StepTimeAcc_s10 + &lastScanTimeShort
     // Change the direction of the flow in the membrane
-    // DV01, DV02, DV03 are OFF = flow from the top
-    |fd101_IV05=ON // ON = Allows flow into the membranes 
+    // It's critical that each of the valves' delay timers are correctly set
+    // and that the state has enough time to complete
+    // Requires: IV06 delay off < IV05 delay off < DV0(1,2,3} delay off
+    // Requires: time for this state > IV06 delay off + IV05 delay off + DV0{1,2,3} delay off
+    |fd101_IV06=OFF // OFF = Open the bypass
+    |fd101_IV05=OFF // OFF = No flow to membranes  
+    // OFF = flow from the top
+    |fd101_DV01=OFF
+    |fd101_DV02=OFF
+    |fd101_DV03=OFF
     // Freeze the PID Controllers for the duration of this state
     |fd101_DPC01pidHold=ON
     |fd101_PC01pidHold=ON
