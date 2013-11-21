@@ -26,13 +26,16 @@ MEM &fd101StepTimeAcc_s10 = 0
 REG &fd101StepTimeAcc_m = &USER_MEMORY_933
 MEM &fd101StepTimeAcc_m = 0
 
+// The four second delay on the following two timers was optimised by Peter and
+// Matthew 22-11-2013.  These values need to be considered along with the delay
+// times for valves IV05, IV06, and DV0{1,2,3}.
 REG &fd101StepTimePre_RECIRC_TO_BOTTOM_s10 = &USER_MEMORY_934
-MEM &fd101StepTimePre_RECIRC_TO_BOTTOM_s10 = 50
+MEM &fd101StepTimePre_RECIRC_TO_BOTTOM_s10 = 40 // four seconds 
 REG &fd101StepTimePre_RECIRC_TO_BOTTOM_m = &USER_MEMORY_935
 MEM &fd101StepTimePre_RECIRC_TO_BOTTOM_m = 0
 
 REG &fd101StepTimePre_RECIRC_TO_TOP_s10 = &USER_MEMORY_936
-MEM &fd101StepTimePre_RECIRC_TO_TOP_s10 = 50
+MEM &fd101StepTimePre_RECIRC_TO_TOP_s10 = 40 // four seconds
 REG &fd101StepTimePre_RECIRC_TO_TOP_m = &USER_MEMORY_937
 MEM &fd101StepTimePre_RECIRC_TO_TOP_m = 0
 

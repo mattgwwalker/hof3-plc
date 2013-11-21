@@ -202,11 +202,11 @@ if (&tempStepNum != &fd101StepNum) then
     case fd101StepNum_RECIRC_TO_TOP:
 
     case fd101StepNum_RECIRC_BW_TOP:
-      // When we start backwashing, set the maximum observed pressure to zero
+      // When we start backwashing, set the initial value for maximum observed pressure to zero
       &fd101_BW_PT03max=0
 
     case fd101StepNum_RECIRC_BW_BOTTOM:
-      // When we start backwashing, set the maximum observed pressure to zero
+      // When we start backwashing, set the initial value for maximum observed pressure to zero
       &fd101_BW_PT03max=0
 
     case fd101StepNum_DRAIN_TOP:
@@ -335,6 +335,7 @@ select &tempStepNum
     |fd101_BF01=ON
     // The flow through the membrane is from the top (because DV01 to DV03 are OFF)
     |fd101_IV05=ON
+    |fd101_IV06=OFF // OFF = Open the bypass
     // Freeze the PID Controllers for the duration of this state
     |fd101_DPC01pidHold=ON
     |fd101_PC01pidHold=ON
@@ -356,11 +357,12 @@ select &tempStepNum
     &fd101BWTimeAcc_m = 0
     // Fire the backwash device
     |fd101_BF01=ON
+    |fd101_IV06=OFF // OFF = Open the bypass
     //The flow through the membrane is from the bottom
+    |fd101_IV05=ON
     |fd101_DV01=ON
     |fd101_DV02=ON
     |fd101_DV03=ON  
-    |fd101_IV05=ON
     // Freeze the PID Controllers for the duration of this state
     |fd101_DPC01pidHold=ON
     |fd101_PC01pidHold=ON

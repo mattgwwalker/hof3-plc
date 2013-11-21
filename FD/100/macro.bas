@@ -16,7 +16,8 @@
 // these registers to zero, all those bits are cleared in each scan,
 // meaning that the code below need only set each bit on if required.
 // The declaration for each bit can be found in _USER_MEMORY.bas.
-&fd100ProgOut01 = 0 &fd100ProgOut02 = 0
+&fd100ProgOut01 = 0 
+&fd100ProgOut02 = 0
 
 //Create ONESHOT function for PB01... which is used to start sequence
 IF (|PB01_I = ON) THEN
@@ -344,9 +345,12 @@ IF (&tempStepNum != &fd100StepNum) THEN
  endsel
 ENDIF
 
+
+
 // ************
 // Step Actions
 // ************
+
 select &tempStepNum
  case fd100StepNum_RESET: //Powerup and Reset State
   &V1x_last = 0.0
