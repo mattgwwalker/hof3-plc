@@ -63,6 +63,7 @@ INCLUDE "{ROOT}\_PID\PC05_USER_MEMORY.bas" //750 - 789
 INCLUDE "{ROOT}\_PID\RC01_USER_MEMORY.bas" //790 - 829
 INCLUDE "{ROOT}\_VV\EL01_USER_MEMORY.bas" //830 - 839
 INCLUDE "{ROOT}\IL01_USER_MEMORY.bas" //840 - 844
+INCLUDE "{ROOT}\FS01_USER_MEMORY.bas" //845 - 845
 
 INCLUDE "{ROOT}\logSetup.bas" //Log
 
@@ -85,6 +86,9 @@ main_macro:
  
  &lastScanTimeShort = &SHORT_TIMER1
  &SHORT_TIMER1 = &SHORT_TIMER1 - &lastScanTimeShort
+ 
+// Pre-processing of FS01's raw input
+INCLUDE "X:\hof3-plc\FS01.bas" 
  
 //Sequences
 INCLUDE "{ROOT}\fd\100\macro.bas"
