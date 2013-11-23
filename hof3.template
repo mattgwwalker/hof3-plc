@@ -143,6 +143,9 @@ INCLUDE "{ROOT}\_VV\PP01.bas"
 INCLUDE "{ROOT}\_VV\PP02.bas"
 INCLUDE "{ROOT}\_VV\PP03.bas"
 
+// Check to see if all items are in auto
+INCLUDE "{ROOT}\CheckAuto.bas"
+
 //Display Variables On Screen
 INCLUDE "{ROOT}\display\macro.bas"
 

@@ -10,3 +10,7 @@ REG &DPT01fault1Sp = &USER_MEMORY_5 //Value
 REG &DPT01fault1Time = &USER_MEMORY_6 //Time (s x 100)
 
 
+// Check if all items are in auto
+REG &CheckAuto = &USER_MEMORY_99
+CONST CheckAuto_ALL_IN_AUTO = 1
+CONST CheckAuto_NOT_ALL_IN_AUTO = 0
