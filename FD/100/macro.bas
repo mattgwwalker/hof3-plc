@@ -312,12 +312,16 @@ IF (&tempStepNum != &fd100StepNum) THEN
    // Set up the PID controllers for Recirc 
    &DPC01sp=&DPC01sp01
    &PC05sp=&PC05sp01
-   &PC03sp=&PC03sp01
-   &PC03cv=&PC03cv01
+   &PC03sp=&PC03sp01 // Backwash target pressure 
+   &PC03cv=&PC03cv01 // Backwash's starting position
     
   case fd100StepNum_CONC: //Production - Concentrate
    &RC01cv=&RC01cv01 //Concentration Ratio Starting Value
    &RC01sp=&RC01sp01 //Concentration Ratio
+
+   // Reset FT03's over-max-flow timer
+   &FT03_OverMaxFlowTimeAcc_s10 = 0
+   &FT03_OverMaxFlowTimeAcc_m = 0
    
   case fd100StepNum_MT2SITE: //Production - Empty Feedtank To Site
   
@@ -460,6 +464,14 @@ select &tempStepNum
   |fd100_RC01pidEn1 = ON //Concetration Ratio Control Loop 
   |fd100_fd101_recirc = ON //Start Route Sequence
 
+  // Check if we're over FT03's max flow rate
+  if (&FT03_100 > FT03_EUMax * FT03_EUMultiplier) then
+    // Increment timer
+    &FT03_OverMaxFlowTimeAcc_s10 = &FT03_OverMaxFlowTimeAcc_s10 + &lastScanTimeShort
+  endif
+    
+
+
  case fd100StepNum_MT2SITE: //Production - Empty Feedtank To Site
   |fd100_fd100Fault_enable1 = ON
   |fd100_DV04 = ON //Permeate To Site  
@@ -504,7 +516,7 @@ if (&fd100StepTimeAcc_m > 32000) then
   &fd100StepTimeAcc_m = 32000
 endif
 
-//Productio Timer Update Minutes when seconds greater than 59.9s
+//Production Timer Update Minutes when seconds greater than 59.9s
 if (&fd100TimeAcc_RECIRC_s10 > 599) then
   &fd100TimeAcc_RECIRC_s10 = &fd100TimeAcc_RECIRC_s10 - 600
   &fd100TimeAcc_RECIRC_m = &fd100TimeAcc_RECIRC_m + 1
@@ -512,6 +524,16 @@ endif
 if (&fd100TimeAcc_RECIRC_m > 32000) then
   &fd100TimeAcc_RECIRC_m = 32000
 endif
+
+// FT03's over-max-flow timer, update minutes inutes when seconds greater than 59.9s
+if (&FT03_OverMaxFlowTimeAcc_s10 > 599) then
+  &FT03_OverMaxFlowTimeAcc_s10 = &FT03_OverMaxFlowTimeAcc_s10 - 600
+  &FT03_OverMaxFlowTimeAcc_m = &FT03_OverMaxFlowTimeAcc_m + 1
+endif
+if (&FT03_OverMaxFlowTimeAcc_m > 32000) then
+  &FT03_OverMaxFlowTimeAcc_m = 32000
+endif
+
 
 
 // *******************

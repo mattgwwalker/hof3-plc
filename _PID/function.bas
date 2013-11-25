@@ -50,21 +50,25 @@ PID:
     //No action
     
    CASE 1:
+    // Auto
     IF (|PIDautoInterlock = ON) THEN
      |PIDmodeMan = OFF
     ENDIF
       
    CASE 2:
+    // Manual
     IF (|PIDmanInterlock = ON) THEN
      |PIDmodeMan = ON
     ENDIF 
     
    CASE 3:
+    // Set output mode
     IF (|PIDsetOutputInterlock = ON) THEN
      |PIDmodePID = OFF
     ENDIF
 
    CASE 4:
+    // PID mode
     IF (|PIDpidInterlock = ON) THEN
      &PIDsp = &PIDpv
      &PIDspRampTarget = &PIDpv 
