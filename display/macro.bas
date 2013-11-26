@@ -70,7 +70,13 @@ select &tempStepNum
      WRITE 2 ""
      &displayFD100StepNumber = &fd100StepNum // A copy so that we know what we're currently displaying
    endif
-   WRITE 2 fd100MsgArray[&displayFD100StepNumber]
+   // Check if the plant's paused
+   if |fd100Fault_fd100_Pause = ON then
+     WRITE 2 "     Paused     "
+     &displayFD100StepNumber = -1 // Paused isn't technically a step, so we're making our own one step number
+   else 
+     WRITE 2 fd100MsgArray[&displayFD100StepNumber]
+   endif
 
   case  2: // FT01
    WRITE 1 ""
