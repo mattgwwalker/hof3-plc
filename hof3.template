@@ -90,7 +90,7 @@ main_macro:
  &SHORT_TIMER1 = &SHORT_TIMER1 - &lastScanTimeShort
  
 // Pre-processing of FS01's raw input
-INCLUDE "X:\hof3-plc\FS01.bas" 
+INCLUDE "{ROOT}\FS01.bas" 
  
 //Sequences
 INCLUDE "{ROOT}\fd\100\macro.bas"
