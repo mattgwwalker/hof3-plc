@@ -277,6 +277,13 @@ IF (&tempStepNum != &fd100StepNum) THEN
  &fd100StepTimeAcc_m = 0 
  select &tempStepNum
   case fd100StepNum_RESET: //Powerup and Reset State
+   // Reset FT02's over-max-flow timer
+   &FT02_OverMaxFlowTimeAcc_s10 = 0
+   &FT02_OverMaxFlowTimeAcc_m = 0
+
+   // Reset FT03's over-max-flow timer
+   &FT03_OverMaxFlowTimeAcc_s10 = 0
+   &FT03_OverMaxFlowTimeAcc_m = 0
   
   case fd100StepNum_WAITINS: //Awaiting Instruction
    &fd100TimeAcc_RECIRC_s10 = 0
@@ -318,14 +325,6 @@ IF (&tempStepNum != &fd100StepNum) THEN
   case fd100StepNum_CONC: //Production - Concentrate
    &RC01cv=&RC01cv01 //Concentration Ratio Starting Value
    &RC01sp=&RC01sp01 //Concentration Ratio
-
-   // Reset FT02's over-max-flow timer
-   &FT02_OverMaxFlowTimeAcc_s10 = 0
-   &FT02_OverMaxFlowTimeAcc_m = 0
-
-   // Reset FT03's over-max-flow timer
-   &FT03_OverMaxFlowTimeAcc_s10 = 0
-   &FT03_OverMaxFlowTimeAcc_m = 0
    
   case fd100StepNum_MT2SITE: //Production - Empty Feedtank To Site
   
@@ -534,7 +533,7 @@ if (&fd100TimeAcc_RECIRC_m > 32000) then
   &fd100TimeAcc_RECIRC_m = 32000
 endif
 
-// FT02's over-max-flow timer, update minutes inutes when seconds greater than 59.9s
+// FT02's over-max-flow timer, update minutes when seconds greater than 59.9s
 if (&FT02_OverMaxFlowTimeAcc_s10 > 599) then
   &FT02_OverMaxFlowTimeAcc_s10 = &FT02_OverMaxFlowTimeAcc_s10 - 600
   &FT02_OverMaxFlowTimeAcc_m = &FT02_OverMaxFlowTimeAcc_m + 1
@@ -543,7 +542,7 @@ if (&FT02_OverMaxFlowTimeAcc_m > 32000) then
   &FT02_OverMaxFlowTimeAcc_m = 32000
 endif
 
-// FT03's over-max-flow timer, update minutes inutes when seconds greater than 59.9s
+// FT03's over-max-flow timer, update minutes when seconds greater than 59.9s
 if (&FT03_OverMaxFlowTimeAcc_s10 > 599) then
   &FT03_OverMaxFlowTimeAcc_s10 = &FT03_OverMaxFlowTimeAcc_s10 - 600
   &FT03_OverMaxFlowTimeAcc_m = &FT03_OverMaxFlowTimeAcc_m + 1
