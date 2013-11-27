@@ -1,6 +1,6 @@
 //FT02 - Permeate Flow
 
-CONST FT02_EUMax = 480.00 //Units l/hr
+CONST FT02_EUMax = 2000.00 //Units l/hr
 CONST FT02_EUMin = 0.00 //Units l/hr
 CONST FT02_EUMultiplier = 100.0
 

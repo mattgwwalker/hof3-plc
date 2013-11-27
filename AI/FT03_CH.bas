@@ -1,6 +1,6 @@
 //FT03 - Retentate Flow
 
-CONST FT03_EUMax = 500.00 //Units l/hr
+CONST FT03_EUMax = 2000.00 //Units l/hr
 CONST FT03_EUMin = 0.00 //Units l/hr
 CONST FT03_EUMultiplier = 100.0
 
