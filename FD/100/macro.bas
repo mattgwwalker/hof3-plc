@@ -319,6 +319,10 @@ IF (&tempStepNum != &fd100StepNum) THEN
    &RC01cv=&RC01cv01 //Concentration Ratio Starting Value
    &RC01sp=&RC01sp01 //Concentration Ratio
 
+   // Reset FT02's over-max-flow timer
+   &FT02_OverMaxFlowTimeAcc_s10 = 0
+   &FT02_OverMaxFlowTimeAcc_m = 0
+
    // Reset FT03's over-max-flow timer
    &FT03_OverMaxFlowTimeAcc_s10 = 0
    &FT03_OverMaxFlowTimeAcc_m = 0
@@ -464,13 +468,18 @@ select &tempStepNum
   |fd100_RC01pidEn1 = ON //Concetration Ratio Control Loop 
   |fd100_fd101_recirc = ON //Start Route Sequence
 
+  // Check if we're over FT02's max flow rate
+  if (&FT02_100 > FT02_EUMax * FT02_EUMultiplier) then
+    // Increment timer
+    &FT02_OverMaxFlowTimeAcc_s10 = &FT02_OverMaxFlowTimeAcc_s10 + &lastScanTimeShort
+  endif
+
   // Check if we're over FT03's max flow rate
   if (&FT03_100 > FT03_EUMax * FT03_EUMultiplier) then
     // Increment timer
     &FT03_OverMaxFlowTimeAcc_s10 = &FT03_OverMaxFlowTimeAcc_s10 + &lastScanTimeShort
   endif
     
-
 
  case fd100StepNum_MT2SITE: //Production - Empty Feedtank To Site
   |fd100_fd100Fault_enable1 = ON
@@ -523,6 +532,15 @@ if (&fd100TimeAcc_RECIRC_s10 > 599) then
 endif
 if (&fd100TimeAcc_RECIRC_m > 32000) then
   &fd100TimeAcc_RECIRC_m = 32000
+endif
+
+// FT02's over-max-flow timer, update minutes inutes when seconds greater than 59.9s
+if (&FT02_OverMaxFlowTimeAcc_s10 > 599) then
+  &FT02_OverMaxFlowTimeAcc_s10 = &FT02_OverMaxFlowTimeAcc_s10 - 600
+  &FT02_OverMaxFlowTimeAcc_m = &FT02_OverMaxFlowTimeAcc_m + 1
+endif
+if (&FT02_OverMaxFlowTimeAcc_m > 32000) then
+  &FT02_OverMaxFlowTimeAcc_m = 32000
 endif
 
 // FT03's over-max-flow timer, update minutes inutes when seconds greater than 59.9s
