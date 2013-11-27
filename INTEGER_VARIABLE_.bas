@@ -5,7 +5,7 @@ mem &DATA_SOURCE_CH9=addr(&SMART2_RESULT1)
 mem &DATA_SOURCE_CH10=addr(&SMART2_RESULT2) 
 
 
-mem &SMART2_SETUP1=0322
+mem &SMART2_SETUP1=0324
 
 // 1st digit = frequency select
 // 0 =
