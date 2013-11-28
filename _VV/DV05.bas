@@ -2,6 +2,8 @@
 //DV05
 //
 
+|DV05autoOut = |fd100_DV05
+
 |DV05eng = |DV05E_I
 |DV05deeng = |DV05D_I
 |DV05manEnable = ON

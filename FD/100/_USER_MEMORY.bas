@@ -10,6 +10,9 @@ CONST fd100cmd_stop = 3 //Stop
 CONST fd100cmd_RECIRC = 4 //Recirc
 CONST fd100cmd_PAUSE = 5 //Pause ... i.e. simulate PB01 action
 CONST fd100cmd_ABORT = 6 //Abort current sequence
+CONST fd100cmd_DRAIN = 7 //Feedtank To Drain
+CONST fd100cmd_STORE = 8 //Feedtank To Storage Tank
+
 
 REG &fd100cmdOns = &USER_MEMORY_891
 MEM &fd100cmdOns = 0
@@ -50,13 +53,16 @@ DIM fd100Faultcmd_resetMsgArray[] = \
 "12.Feed tank full of CIP Chem",\
 "13.Feed tank empty of CIP Chem",\
 "14.Pause Selection Activated",\
+"15.Feed tank Fill Max Time Expired",\
 ""]
 
 REG &fd100ProgOut01 = &USER_MEMORY_905
 BITREG &fd100ProgOut01 = [\
 |fd100_DV04,\
+|fd100_DV05,\
 |fd100_DV06en1,\
 |fd100_fd100Fault_enable1,\
+|fd100_fd100Fault_FILL,\
 |fd100_IL01,\
 |fd100_IL01waiting,\
 |fd100_IV07,\
@@ -64,6 +70,7 @@ BITREG &fd100ProgOut01 = [\
 |fd100_IV10en1,\
 |fd100_IV15,\
 |fd100_PP01,\
+|fd100_PP03en1,\
 |fd100_fd102_chemdoseEn1]
 MEM &fd100ProgOut01 = 0
 
@@ -102,6 +109,8 @@ REG &fd100StepTimePre_PB_s10 = &USER_MEMORY_910
 MEM &fd100StepTimePre_PB_s10 = 100
 REG &fd100StepTimePre_PB_m = &USER_MEMORY_911
 MEM &fd100StepTimePre_PB_m = 1
+
+//Time for Fill see below...added after
 
 //Time for Step MIX 
 REG &fd100StepTimePre_MIX_s10 = &USER_MEMORY_912
@@ -146,7 +155,8 @@ BITREG &fd100FaultProgOut01 = [\
 |fd100Fault_IL01fault,\
 |fd100Fault_PB01toPause,\
 |fd100Fault_PB01toRestart,\
-|fd100Fault_PP01stop,\
+|fd100Fault_PP01pause,\
+|fd100Fault_PP03pause,\
 |fd100Fault_DPC01pidHold,\
 |fd100Fault_PC01pidHold,\
 |fd100Fault_PC05pidHold,\
@@ -161,6 +171,7 @@ CONST fd100FillSource_SITE = 1 //Fill Feedtank from Site
 CONST fd100FillSource_WATER = 2 //Fill Feedtank with water via CIP chemical line
 CONST fd100FillSource_CHEM = 3 //Fill Feedtank with water and CIP Chemical line
 CONST fd100FillSource_MANCHEM = 4 //Fill Feedtank with water and Manually Dosed CIP Chemical
+CONST fd100FillSource_TANK = 5 //Fill Feedtank from Storage Tank 
 MEM &fd100FillSource = fd100FillSource_SITE
 
 REG &fd100Status = &USER_MEMORY_925
@@ -172,3 +183,14 @@ CONST fd100Status_RINSE_MT = 4 //Feed tank empty of Rinse Water
 CONST fd100Status_CIP_FULL = 5 //Feed tank full of CIP Chem
 CONST fd100Status_CIP_MT = 6 //Feed tank empty of CIP Chem
 MEM &fd100Status = fd100Status_UNKNOWN
+
+//Fill Time 
+REG &fd100StepTimePre_FILL_s10 = &USER_MEMORY_926
+MEM &fd100StepTimePre_FILL_s10 = 200
+REG &fd100StepTimePre_FILL_m = &USER_MEMORY_927
+MEM &fd100StepTimePre_FILL_m = 0
+
+REG &fd100_LT01max = &USER_MEMORY_928
+
+
+

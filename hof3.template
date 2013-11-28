@@ -103,13 +103,11 @@ INCLUDE "{ROOT}\fd\102\macro.bas"
 |CP01autoOut = OFF
 |CP02autoOut = OFF
 |DV04autoOut = OFF
-|DV05autoOut = OFF
 |DV07autoOut = OFF
 |DV08autoOut = OFF
 |EL01autoOut = OFF
 |IV07autoOut = OFF
 |IV16autoOut = OFF
-|PP03autoOut = OFF
 
 //General Devices
 INCLUDE "{ROOT}\IL01.bas"

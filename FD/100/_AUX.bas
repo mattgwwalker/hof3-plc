@@ -13,6 +13,8 @@ CONST fd100StepNum_CONC = 7
 CONST fd100StepNum_MT2SITE = 8
 CONST fd100StepNum_MT2DRAIN = 9
 CONST fd100StepNum_DRAIN = 10
+CONST fd100StepNum_MT2STORE = 11
+CONST fd100StepNum_DRAIN2STORE = 12
 
 DIM fd100MsgArray[] = \
 ["     Reset     ",\
@@ -26,8 +28,8 @@ DIM fd100MsgArray[] = \
 "Emptying to site",\
 "Pumping to drain",\
 "    Draining    ",\
-"",\
-""]
+"Pumping to store",\
+"Drain to store"]
 
 REG &fd100StepTimeAcc = &AUX2
 MEM &fd100StepTimeAcc = 0

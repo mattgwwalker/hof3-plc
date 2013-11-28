@@ -94,6 +94,8 @@ select &fd100cmd
    &fd100cmdOns = &fd100cmd
   elsif ((&fd100cmd_prod_msg = 0) AND (&fd100FillSource = fd100FillSource_NONE)) then
    &fd100cmdOns = &fd100cmd
+  elsif ((&fd100cmd_prod_msg = 0) AND (&fd100FillSource = fd100FillSource_TANK)) then
+   &fd100cmdOns = &fd100cmd 
   elsif ((&fd100cmd_rinse_msg = 0) AND (&fd100FillSource = fd100FillSource_WATER)) then
    &fd100cmdOns = &fd100cmd
   elsif ((&fd100cmd_cip_msg = 0) AND (&fd100FillSource = fd100FillSource_CHEM)) then
@@ -124,6 +126,12 @@ select &tempStepNum
   ENDIF
   IF (&fd100cmdOns=fd100cmd_RECIRC) THEN
    &tempStepNum = fd100StepNum_FILL 
+  ENDIF
+  IF (&fd100cmdOns=fd100cmd_DRAIN) THEN
+   &tempStepNum = fd100StepNum_MT2DRAIN 
+  ENDIF
+  IF (&fd100cmdOns=fd100cmd_STORE) THEN
+   &tempStepNum = fd100StepNum_MT2STORE 
   ENDIF 
  
  case fd100StepNum_PB: //***Awaiting Start From Pushbutton
@@ -158,11 +166,14 @@ select &tempStepNum
 
  case fd100StepNum_FILL: //Fill Feedtank
   //Start Recirc After Feedtank reaches min level. 
-  IF (&LT01_100 > (&LT01SP03 + &LT01SP04)) THEN
+  IF ((&LT01_100 > (&LT01SP03 + &LT01SP04))\
+   AND ((&fd100FillSource != fd100FillSource_TANK)\
+    OR ((&fd100StepTimeAcc_m >= &fd100StepTimePre_FILL_m)\
+     AND (&fd100StepTimeAcc_s10 >= &fd100StepTimePre_FILL_s10)))) THEN  
    &tempStepNum = fd100StepNum_MIX 
   ENDIF
   IF (&fd100cmdOns=fd100cmd_stop) THEN
-   &tempStepNum = fd100StepNum_DRAIN 
+   &tempStepNum = fd100StepNum_END 
   ENDIF
   IF (&fd100cmdOns=fd100cmd_ABORT) THEN
    &tempStepNum = fd100StepNum_WAITINS  
@@ -181,7 +192,7 @@ select &tempStepNum
   ENDIF
   //Stop Production or CIP Chemical Wash  
   IF (&fd100cmdOns=fd100cmd_stop) THEN
-   &tempStepNum = fd100StepNum_MT2DRAIN 
+   &tempStepNum = fd100StepNum_END 
   ENDIF
   IF (&fd100cmdOns=fd100cmd_ABORT) THEN
    &tempStepNum = fd100StepNum_WAITINS  
@@ -202,11 +213,11 @@ select &tempStepNum
   IF ((&fd100TimeAcc_RECIRC_m >= &fd100TimePre_RECIRC_m)\
    AND (&fd100TimeAcc_RECIRC_s10 >= &fd100TimePre_RECIRC_s10)\
    AND (&fd100TimePre_RECIRC_s10 >= 0)) THEN
-    &tempStepNum = fd100StepNum_MT2DRAIN  
+    &tempStepNum = fd100StepNum_END  
   ENDIF  
   //Stop Production or CIP Chemical Wash  
   IF (&fd100cmdOns=fd100cmd_stop) THEN
-   &tempStepNum = fd100StepNum_MT2DRAIN 
+   &tempStepNum = fd100StepNum_END 
   ENDIF
   IF (&fd100cmdOns=fd100cmd_ABORT) THEN
    &tempStepNum = fd100StepNum_WAITINS  
@@ -233,7 +244,7 @@ select &tempStepNum
  case fd100StepNum_MT2SITE: //Production - Empty Feedtank To Site
   //Feed Tank Reached Min Level. 
   IF (&LT01_100 < &LT01SP05) THEN
-   &tempStepNum = fd100StepNum_MT2DRAIN 
+   &tempStepNum = fd100StepNum_END
   ENDIF
   IF (&fd100cmdOns=fd100cmd_ABORT) THEN
    &tempStepNum = fd100StepNum_WAITINS  
@@ -256,7 +267,26 @@ select &tempStepNum
   ENDIF
   IF (&fd100cmdOns=fd100cmd_ABORT) THEN
    &tempStepNum = fd100StepNum_WAITINS  
-  ENDIF 
+  ENDIF  
+  
+ case fd100StepNum_MT2STORE: //Production or CIP Chemical Wash - Pump Feedtank To Drain
+  //Feed Tank Reached Empty Level. 
+  IF (&LT01_100 < &LT01SP06) THEN
+   &tempStepNum = fd100StepNum_DRAIN2STORE
+  ENDIF
+  IF (&fd100cmdOns=fd100cmd_ABORT) THEN
+   &tempStepNum = fd100StepNum_WAITINS  
+  ENDIF  
+  
+ case fd100StepNum_DRAIN2STORE: //Production or CIP Chemical Wash - Drain Plant
+  //Drain Plant Time
+  IF ((&fd100StepTimeAcc_m >= &fd100StepTimePre_DRAIN_m)\
+   AND (&fd100StepTimeAcc_s10 >= &fd100StepTimePre_DRAIN_s10)) THEN
+    &tempStepNum = fd100StepNum_END  
+  ENDIF
+  IF (&fd100cmdOns=fd100cmd_ABORT) THEN
+   &tempStepNum = fd100StepNum_WAITINS  
+  ENDIF  
    
  default:
   &tempStepNum = fd100StepNum_RESET
@@ -295,6 +325,7 @@ IF (&tempStepNum != &fd100StepNum) THEN
   
   case fd100StepNum_FILL: //Production or CIP Chemical Wash - Fill Feedtank
    &PC05cv=&PC05cv01 //Open CV01 to enable recirc
+   &fd100_LT01max = 0 
    
   case fd100StepNum_MIX: //Production or CIP Chemical Wash - Mix Via Bypass Line
    &DPC01cv=&DPC01cv01 //Set PC01sp to control the speed of the Main Feed Pump
@@ -313,6 +344,9 @@ IF (&tempStepNum != &fd100StepNum) THEN
    endif
    if (&fd100FillSource = fd100FillSource_MANCHEM) then
     &fd100Status = fd100Status_CIP_FULL //Set Plant Status
+   endif
+   if (&fd100FillSource = fd100FillSource_TANK) then
+    &fd100Status = fd100Status_UNKNOWN //Set Plant Status
    endif   
 
   case fd100StepNum_RECIRC: //Production or CIP Chemical Wash - Recirc through filter
@@ -346,7 +380,33 @@ IF (&tempStepNum != &fd100StepNum) THEN
    endif
    if (&fd100FillSource = fd100FillSource_MANCHEM) then
     &fd100Status = fd100Status_CIP_MT //Set Plant Status
-   endif   
+   endif
+   if (&fd100FillSource = fd100FillSource_TANK) then
+    &fd100Status = fd100Status_UNKNOWN //Set Plant Status
+   endif 
+
+ case fd100StepNum_MT2STORE: //Production or CIP Chemical Wash - Pump Feedtank To Drain 
+   &PC01cv=&PC01cv02
+   
+  case fd100StepNum_DRAIN2STORE: //Production or CIP Chemical Wash - Empty Feedtank To Drain
+   if (&fd100FillSource = fd100FillSource_NONE) then
+    &fd100Status = fd100Status_PROD_MT //Set Plant Status
+   endif
+   if (&fd100FillSource = fd100FillSource_SITE) then
+    &fd100Status = fd100Status_PROD_MT //Set Plant Status
+   endif
+   if (&fd100FillSource = fd100FillSource_WATER) then
+    &fd100Status = fd100Status_RINSE_MT //Set Plant Status
+   endif
+   if (&fd100FillSource = fd100FillSource_CHEM) then
+    &fd100Status = fd100Status_CIP_MT //Set Plant Status
+   endif
+   if (&fd100FillSource = fd100FillSource_MANCHEM) then
+    &fd100Status = fd100Status_CIP_MT //Set Plant Status
+   endif
+   if (&fd100FillSource = fd100FillSource_TANK) then
+    &fd100Status = fd100Status_UNKNOWN //Set Plant Status
+   endif     
          
   default:
  endsel
@@ -382,12 +442,23 @@ select &tempStepNum
   &R01 = 1.0   
   
  case fd100StepNum_FILL: //Production or CIP Chemical Wash - Fill Feedtank
+  if (|fd100Fault_fd100_Pause=OFF) then
+   if (&LT01_100 <= &fd100_LT01max + 100) then // 100 = 1%
+    &fd100StepTimeAcc_s10 = &fd100StepTimeAcc_s10 + &lastScanTimeShort
+   else
+    &fd100_LT01max = &LT01_100
+    &fd100StepTimeAcc_s10 = 0
+    &fd100StepTimeAcc_m = 0
+   endif 
+  endif  
   |fd100_fd100Fault_enable1 = ON
+  |fd100_fd100Fault_FILL = ON
   |fd100_DV06en1 = ON //Energise If Fill Source is WATER  
   |fd100_IL01 = ON //PB01 LED Light
   |fd100_IV08en1 = ON //Energise If Fill Source is SITE and Level Low 
   |fd100_IV10en1 = ON //Energise If Fill Source is WATER and Level Low 
   |fd100_IV15 = ON //Seal Water
+  |fd100_PP03en1 = ON //Fill from Storage Tank 
   |fd100_PC05so = ON //Open CV01 to enable recirc
  
  case fd100StepNum_MIX: //Production or CIP Chemical Wash - Mix Via Bypass Line
@@ -511,6 +582,26 @@ select &tempStepNum
   &V1x_last = 0.0
   &R01_last = 1.0
   &R01 = 1.0
+  
+ case fd100StepNum_MT2STORE: //Production or CIP Chemical Wash - Pump Feedtank To Store
+  |fd100_DV05 = ON
+  |fd100_fd100Fault_enable1 = ON  
+  |fd100_IL01 = ON //PB01 LED Light 
+  |fd100_IV15 = ON //Seal Water
+  |fd100_PP01 = ON //Run Pump 
+  |fd100_PC01so = ON
+  |fd100_fd101_drain = ON //Cycle Filter Valves to Drain
+  &V1x_last = 0.0
+  &R01_last = 1.0
+  &R01 = 1.0  
+  
+ case fd100StepNum_DRAIN2STORE: //Production or CIP Chemical Wash - Empty Feedtank To Store
+  &fd100StepTimeAcc_s10 = &fd100StepTimeAcc_s10 + &lastScanTimeShort
+  |fd100_DV05 = ON
+  |fd100_fd101_drain = ON //Cycle Filter Valves to Drain   
+  &V1x_last = 0.0
+  &R01_last = 1.0
+  &R01 = 1.0
      
  default:
 endsel
@@ -581,7 +672,12 @@ if (|fd100Fault_msg1 = ON) then
  ELSIF ((|FS01_I = OFF) AND (|PP01out = ON)) THEN
   &OPmsg = 7
  ELSIF ((|fd100Fault_PB01toPause = ON) AND (&fd100cmdOns=fd100cmd_PAUSE)) THEN
-  &OPmsg = 14       
+  &OPmsg = 14
+ ELSIF ((|fd100_fd100Fault_FILL = ON)\
+  AND (&fd100StepTimeAcc_m >= &fd100StepTimePre_FILL_m)\
+  AND (&fd100StepTimeAcc_s10 > &fd100StepTimePre_FILL_s10)\
+  AND (&LT01_100 < (&LT01SP03 + &LT01SP04))) THEN
+  &OPmsg = 15        
  ENDIF
 endif
 &fd100Faultcmd_resetMsg = &OPmsg
@@ -646,6 +742,7 @@ select &tempStepNum
   |fd100Fault_msg1 = ON
   |fd100Fault_PB01toRestart = ON  
   |fd100Fault_PP01pause = ON
+  |fd100Fault_PP03pause = ON
   |fd100Fault_DPC01pidHold = ON
   |fd100Fault_PC01pidHold = ON
   |fd100Fault_PC05pidHold = ON
