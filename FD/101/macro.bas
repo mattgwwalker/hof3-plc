@@ -112,16 +112,16 @@ select &tempStepNum
     // If the Recirc flag is off, head back to the Bypass state
     if (|fd100_fd101_recirc=OFF) then
       &tempStepNum = fd101StepNum_BYPASS
-     endif
-     // Once we've spent enough time here, we increment the backwash count
-     // and set a flag to ensure the PID controller PC03 gets updated
-     // then we head back to RecircTop
-     if ((&fd101StepTimeAcc_m >= &fd101StepTimePre_RECIRC_BW_TOP_m) \
-     and (&fd101StepTimeAcc_s10 >= &fd101StepTimePre_RECIRC_BW_TOP_s10)) then
-       &tempStepNum = fd101StepNum_RECIRC_TOP
-       &fd101_BW_count = &fd101_BW_count + 1
-       |fd101_PC03calc = ON
-     endif
+    endif
+    // Once we've spent enough time here, we increment the backwash count
+    // and set a flag to ensure the PID controller PC03 gets updated
+    // then we head back to RecircTop
+    if ((&fd101StepTimeAcc_m >= &fd101StepTimePre_RECIRC_BW_TOP_m) \
+    and (&fd101StepTimeAcc_s10 >= &fd101StepTimePre_RECIRC_BW_TOP_s10)) then
+      &tempStepNum = fd101StepNum_RECIRC_TOP
+      &fd101_BW_count = &fd101_BW_count + 1
+      |fd101_PC03calc = ON
+    endif
     
     
   case  fd101StepNum_RECIRC_BW_BOTTOM:
@@ -202,12 +202,14 @@ if (&tempStepNum != &fd101StepNum) then
     case fd101StepNum_RECIRC_TO_TOP:
 
     case fd101StepNum_RECIRC_BW_TOP:
-      // When we start backwashing, set the initial value for maximum observed pressure to zero
-      &fd101_BW_PT03max=0
+      // When we start backwashing, set the initial value for maximum 
+      // observed pressure to the current value of PT03
+      &fd101_BW_PT03max = &PT03_1000
 
     case fd101StepNum_RECIRC_BW_BOTTOM:
-      // When we start backwashing, set the initial value for maximum observed pressure to zero
-      &fd101_BW_PT03max=0
+      // When we start backwashing, set the initial value for maximum 
+      // observed pressure to the current value of PT03
+      &fd101_BW_PT03max = &PT03_1000
 
     case fd101StepNum_DRAIN_TOP:
 
