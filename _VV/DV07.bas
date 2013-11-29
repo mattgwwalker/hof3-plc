@@ -2,6 +2,12 @@
 //DV07
 //
 
+IF ((|CP01out = ON) AND (&TT01_100 > (&TT01SP01 + &TT01SP02))) THEN
+ |DV07autoOut= ON
+ELSIF ((|CP01out = OFF) OR (&TT01_100 < (&TT01SP01 - &TT01SP02))) THEN
+ |DV07autoOut = OFF
+ENDIF
+
 
 |DV07manEnable = ON
 |DV07engEnable = ON
@@ -32,4 +38,10 @@ ENDIF
 &DV07faultTimerAcc = &VVfaultTimerAcc
 &DV07motFaultTimerAcc = &VVmotFaultTimerAcc
 
-|DV07_O = |DV07out
+IF (|DV07out = ON) THEN  
+ |DV07_O = OFF
+ELSE
+ |DV07_O = ON
+ENDIF
+
+ 

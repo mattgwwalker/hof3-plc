@@ -26,6 +26,12 @@ MEM &fd100cmd_cip_msg = 0
 REG &fd100cmd_rinse_msg = &USER_MEMORY_894
 MEM &fd100cmd_rinse_msg = 0
 
+REG &fd100cmd_DRAIN_msg = &USER_MEMORY_895
+MEM &fd100cmd_DRAIN_msg = 0
+
+REG &fd100cmd_STORE_msg = &USER_MEMORY_896
+MEM &fd100cmd_STORE_msg = 0
+
 REG &fd100Faultcmd = &USER_MEMORY_902
 MEM &fd100Faultcmd = 0
 CONST fd100Faultcmd_noAction = 0 //No Action
@@ -54,6 +60,14 @@ DIM fd100Faultcmd_resetMsgArray[] = \
 "13.Feed tank empty of CIP Chem",\
 "14.Pause Selection Activated",\
 "15.Feed tank Fill Max Time Expired",\
+"16.Feed tank Temperature Too Low",\
+"17.Feed tank Temperature Too High",\
+"18.Inlet Pressure High",\
+"19.Transmembrane Pressure High",\
+"20.Back Pressure High",\
+"21.Along Membrane Pressure High",\
+"22.Feed tank pH Too Low",\
+"23.Feed tank pH Too High",\
 ""]
 
 REG &fd100ProgOut01 = &USER_MEMORY_905
@@ -71,6 +85,7 @@ BITREG &fd100ProgOut01 = [\
 |fd100_IV15,\
 |fd100_PP01,\
 |fd100_PP03en1,\
+|fd100Temperatureen1,\
 |fd100_fd102_chemdoseEn1]
 MEM &fd100ProgOut01 = 0
 
@@ -161,6 +176,7 @@ BITREG &fd100FaultProgOut01 = [\
 |fd100Fault_PC01pidHold,\
 |fd100Fault_PC05pidHold,\
 |fd100Fault_RC01pidHold,\
+|fd100Fault_temperatureHold,\
 |fd100Fault_fd100_Pause,\
 |fd100Fault_fd101_Pause,\
 |fd100Fault_fd102_Pause]
@@ -191,6 +207,12 @@ REG &fd100StepTimePre_FILL_m = &USER_MEMORY_927
 MEM &fd100StepTimePre_FILL_m = 0
 
 REG &fd100_LT01max = &USER_MEMORY_928
+
+REG &fd100Temperature = &USER_MEMORY_929
+CONST fd100Temperature_NONE = 0 //None
+CONST fd100Temperature_HEAT = 1 //Heat to Setpoint
+CONST fd100Temperature_COOL = 2 //Cool to Setpoint
+MEM &fd100Temperature = fd100Temperature_NONE
 
 
 

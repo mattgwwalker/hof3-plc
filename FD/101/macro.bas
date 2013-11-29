@@ -232,7 +232,7 @@ select &tempStepNum
     // Do nothing in the Reset state
  
   case  fd101StepNum_BYPASS:
-    // Do nothing in the Bypass state
+    |fd101_DV02=ON
   
   case  fd101StepNum_RECIRC_TOP:
     // Check that we're not paused, and update the timers
