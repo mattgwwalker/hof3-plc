@@ -224,6 +224,7 @@ select &tempStepNum
   IF ((&fd100StepTimeAcc_m >= &fd100StepTimePre_MIX_m)\
    AND (&fd100StepTimeAcc_s10 >= &fd100StepTimePre_MIX_s10)\
    AND (&fd100StepTimePre_MIX_s10 >= 0)\
+   AND (|fd102_fd100_dosingChem=OFF)\
    AND (((&fd100Temperature = fd100Temperature_HEAT) AND (&TT01_100 > &TT01SP01))\
     OR ((&fd100Temperature = fd100Temperature_COOL) AND (&TT01_100 < &TT01SP01)))) THEN
    &tempStepNum = fd100StepNum_RECIRC  
@@ -240,6 +241,10 @@ select &tempStepNum
   //Stop Recirculation if level drops too low. 
   IF (&LT01_100 < (&LT01SP03 - &LT01SP04)) THEN
    &tempStepNum = fd100StepNum_FILL 
+  ENDIF
+  //Stop Recirculation and return to Mix if dosing Chemical. 
+  IF (|fd102_fd100_dosingChem=ON) THEN
+   &tempStepNum = fd100StepNum_MIX 
   ENDIF
   //Recirculation Time Before Concentrating through HOF ... If _s10 < 0  then don't go to CONC
   IF ((&fd100StepTimeAcc_m >= &fd100StepTimePre_RECIRC_m)\
