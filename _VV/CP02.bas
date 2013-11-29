@@ -2,6 +2,12 @@
 //CP02
 //
 
+IF (|fd100Temperatureen1 = ON) AND (|fd100Fault_temperatureHold = OFF) AND (&fd100Temperature = fd100Temperature_COOL) THEN
+ |CP02autoOut = ON
+ELSE
+ |CP02autoOut = OFF
+ENDIF
+
 |CP02eng = |CP02_I
 |CP02manEnable = ON
 |CP02engEnable = ON

@@ -6,7 +6,8 @@ BITREG &fd102ProgOut01 = [\
 |fd102_DV06,\
 |fd102_IV09,\
 |fd102_IV10,\
-|fd102_PP02]
+|fd102_PP02,\
+|fd102_fd100_dosingChem]
 
 REG &fd102StepTimeAcc_s10 = &USER_MEMORY_991
 MEM &fd102StepTimeAcc_s10 = 0

@@ -2,6 +2,12 @@
 //DV08
 //
 
+IF ((|CP02out = ON) AND (&TT01_100 > (&TT01SP01 + &TT01SP02))) THEN
+ |DV08autoOut= ON
+ELSIF ((|CP02out = OFF) OR (&TT01_100 < (&TT01SP01 - &TT01SP02))) THEN
+ |DV08autoOut = OFF
+ENDIF
+
 |DV08manEnable = ON
 |DV08engEnable = ON
 |DV08deengEnable = ON
@@ -31,4 +37,8 @@ ENDIF
 &DV08faultTimerAcc = &VVfaultTimerAcc
 &DV08motFaultTimerAcc = &VVmotFaultTimerAcc
 
-|DV08_O = |DV08out
+IF (|DV08out = ON) THEN  
+ |DV08_O = OFF
+ELSE
+ |DV08_O = ON
+ENDIF

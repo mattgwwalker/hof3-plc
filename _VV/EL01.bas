@@ -2,6 +2,12 @@
 //EL01
 //
 
+IF (|fd100Temperatureen1 = ON) AND (|fd100Fault_temperatureHold = OFF) AND (&fd100Temperature = fd100Temperature_HEAT) THEN
+ |EL01autoOut = ON
+ELSE
+ |EL01autoOut = OFF
+ENDIF
+
 |EL01manEnable = ON
 |EL01engEnable = ON
 |EL01deengEnable = ON
@@ -32,7 +38,14 @@ ENDIF
 &EL01motFaultTimerAcc = &VVmotFaultTimerAcc
 
 |EL01_O = |EL01out
-|EL01_PWM1 = OFF //............
-|EL01_PWM2 = OFF //...............
-|EL01_PWM3 = OFF //..............
+
+IF ((|EL01out = ON) AND (&TT01_100 < (&TT01SP01 - &TT01SP02)) AND (&LT01_100 > (&LT01SP07 + &LT01SP08))) THEN
+ |EL01_PWM1 = ON
+ |EL01_PWM2 = ON
+ |EL01_PWM3 = ON
+ELSIF ((|EL01out = OFF) OR (&TT01_100 > (&TT01SP01 + &TT01SP02)) OR (&LT01_100 < (&LT01SP07 - &LT01SP08))) THEN
+ |EL01_PWM1 = OFF
+ |EL01_PWM2 = OFF
+ |EL01_PWM3 = OFF
+ENDIF
 

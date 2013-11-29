@@ -68,6 +68,7 @@ select &tempStepNum
   |fd102_DV06=ON
   |fd102_IV09=ON
   |fd102_PP02=ON
+  |fd102_fd100_dosingChem=ON
   
  case  fd102StepNum_PURGE:
   if (|fd100Fault_fd102_Pause=OFF) then
@@ -75,6 +76,7 @@ select &tempStepNum
   endif
   |fd102_DV06=ON
   |fd102_IV10=ON
+  |fd102_fd100_dosingChem=ON
  
  case  fd102StepNum_END:    
          
