@@ -9,20 +9,25 @@ CONST fd101StepNum_RECIRC_TO_BOTTOM = 3
 CONST fd101StepNum_RECIRC_BOTTOM = 4
 CONST fd101StepNum_RECIRC_TO_TOP = 5
 CONST fd101StepNum_RECIRC_BW_TOP = 6
-CONST fd101StepNum_RECIRC_BW_BOTTOM = 7
-CONST fd101StepNum_DRAIN_TOP = 8
-CONST fd101StepNum_DRAIN_BOTTOM = 9
+CONST fd101StepNum_RECIRC_BW_TOP_RETRACT = 7
+CONST fd101StepNum_RECIRC_BW_BOTTOM = 8
+CONST fd101StepNum_RECIRC_BW_BOTTOM_RETRACT = 9
+CONST fd101StepNum_DRAIN_TOP = 10
+CONST fd101StepNum_DRAIN_BOTTOM = 11
 
 DIM fd101MsgArray[] = \
 ["Reset",\
-"Default Route - Flow Through Bypass",\
-"Recirc - Flow From Top",\
-"Recirc - Flow To Bottom",\
-"Recirc - Flow From Botton",\
-"Recirc - Flow To Top",\
-"Recirc - BW From Top",\
-"Recirc - BW From Bottom",\
- ""\
+"Default Route - Flowing through bypass only",\
+"Recirc - Flow from top of membrane",\
+"Recirc - Flow changing to be from bottom of membrane",\
+"Recirc - Flow from botton of membrane",\
+"Recirc - Flow changing to be from top of membrane",\
+"Recirc - Backwashing with flow from the top of the membrane",\
+"Recirc - Retracting backwash piston with flow from the top of the membrane",\
+"Recirc - Backwashing with flow from the bottom of the membrane",\
+"Recirc - Retracting backwash piston with flow from the bottom of the membrane",\
+"Drain - Draining with flow from the top of the membrane",\
+"Drain - Draining with flow from the bottom of the membrane"\
 ]
 
 REG &fd101StepTimeAcc = &AUX4

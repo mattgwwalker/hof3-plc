@@ -11,9 +11,6 @@
 // we are transitioning to the state "Recirc Top", i.e. the flow will become 
 // from the top.
 
-// The length of time to freeze the PID controllers after a direction change
-CONST fd101StepTimeAcc_FREEZE_PIDS_m = 0
-CONST fd101StepTimeAcc_FREEZE_PIDS_s10 = 100
 
 
 //Clear Sequence Outputs... these are then set on below
@@ -106,9 +103,22 @@ select &tempStepNum
     endif
    
    
-  // *** Backwashes ***
+  // *** Backwashing ***
 
   case  fd101StepNum_RECIRC_BW_TOP:
+    // If the Recirc flag is off, head back to the Bypass state
+    if (|fd100_fd101_recirc=OFF) then
+      &tempStepNum = fd101StepNum_BYPASS
+    endif
+    // Once we've spent enough time here, we head off to retract the 
+    // backwash device
+    if ((&fd101StepTimeAcc_m >= &fd101StepTimePre_RECIRC_BW_TOP_m) \
+    and (&fd101StepTimeAcc_s10 >= &fd101StepTimePre_RECIRC_BW_TOP_s10)) then
+      &tempStepNum = fd101StepNum_RECIRC_BW_TOP_RETRACT
+    endif
+
+
+  case  fd101StepNum_RECIRC_BW_TOP_RETRACT:
     // If the Recirc flag is off, head back to the Bypass state
     if (|fd100_fd101_recirc=OFF) then
       &tempStepNum = fd101StepNum_BYPASS
@@ -116,15 +126,28 @@ select &tempStepNum
     // Once we've spent enough time here, we increment the backwash count
     // and set a flag to ensure the PID controller PC03 gets updated
     // then we head back to RecircTop
-    if ((&fd101StepTimeAcc_m >= &fd101StepTimePre_RECIRC_BW_TOP_m) \
-    and (&fd101StepTimeAcc_s10 >= &fd101StepTimePre_RECIRC_BW_TOP_s10)) then
+    if ((&fd101StepTimeAcc_m >= &fd101StepTimePre_RECIRC_BW_RETRACT_m) \
+    and (&fd101StepTimeAcc_s10 >= &fd101StepTimePre_RECIRC_BW_RETRACT_s10)) then
       &tempStepNum = fd101StepNum_RECIRC_TOP
       &fd101_BW_count = &fd101_BW_count + 1
       |fd101_PC03calc = ON
     endif
-    
+
     
   case  fd101StepNum_RECIRC_BW_BOTTOM:
+    // If the Recirc flag is off, head back to the Bypass state
+    if (|fd100_fd101_recirc=OFF) then
+      &tempStepNum = fd101StepNum_BYPASS
+    endif
+    // Once we've spent enough time here, we head off to retract the 
+    // backwash device                                       
+    if ((&fd101StepTimeAcc_m >= &fd101StepTimePre_RECIRC_BW_BOTTOM_m) \
+    and (&fd101StepTimeAcc_s10 >= &fd101StepTimePre_RECIRC_BW_BOTTOM_s10)) then
+      &tempStepNum = fd101StepNum_RECIRC_BW_BOTTOM_RETRACT
+    endif
+  
+
+  case  fd101StepNum_RECIRC_BW_BOTTOM_RETRACT:
     // If the Recirc flag is off, head back to the Bypass state
     if (|fd100_fd101_recirc=OFF) then
       &tempStepNum = fd101StepNum_BYPASS
@@ -132,13 +155,13 @@ select &tempStepNum
     // Once we've spent enough time here, we increment the backwash count
     // and set a flag to ensure the PID controller PC03 gets updated
     // then we head back to RecircBottom
-    if ((&fd101StepTimeAcc_m >= &fd101StepTimePre_RECIRC_BW_BOTTOM_m) \
-    and (&fd101StepTimeAcc_s10 >= &fd101StepTimePre_RECIRC_BW_BOTTOM_s10)) then
+    if ((&fd101StepTimeAcc_m >= &fd101StepTimePre_RECIRC_BW_RETRACT_m) \
+    and (&fd101StepTimeAcc_s10 >= &fd101StepTimePre_RECIRC_BW_RETRACT_s10)) then
       &tempStepNum = fd101StepNum_RECIRC_BOTTOM
       &fd101_BW_count = &fd101_BW_count + 1
       |fd101_PC03calc = ON
     endif
-  
+
 
   // *** Draining ***
   
@@ -182,9 +205,10 @@ endsel
 // occur every scan.
 
 if (&tempStepNum != &fd101StepNum) then
+  // We're changing steps, make the new step the official one
   &fd101StepNum = &tempStepNum
 
-  // Reset the step timer to zero
+  // Reset the step timer to zero seeing we're changing steps
   &fd101StepTimeAcc_s10 = 0
   &fd101StepTimeAcc_m = 0
 
@@ -206,10 +230,14 @@ if (&tempStepNum != &fd101StepNum) then
       // observed pressure to the current value of PT03
       &fd101_BW_PT03max = &PT03_1000
 
+    case fd101StepNum_RECIRC_BW_TOP_RETRACT:
+
     case fd101StepNum_RECIRC_BW_BOTTOM:
       // When we start backwashing, set the initial value for maximum 
       // observed pressure to the current value of PT03
       &fd101_BW_PT03max = &PT03_1000
+
+    case fd101StepNum_RECIRC_BW_BOTTOM_RETRACT:
 
     case fd101StepNum_DRAIN_TOP:
 
@@ -245,14 +273,6 @@ select &tempStepNum
     // Requires: time for this state > IV05 delay on + IV06 delay on (DV0{1,2,3} aren't changing)
     |fd101_IV05=ON // ON = Allow flow into membranes
     |fd101_IV06=ON // ON = Close the bypass
-    // Freeze the PID controllers for the first few seconds of this state
-    if ((&fd101StepTimeAcc_m <= fd101StepTimeAcc_FREEZE_PIDS_m) \
-    and (&fd101StepTimeAcc_s10 < fd101StepTimeAcc_FREEZE_PIDS_s10)) then       
-      |fd101_DPC01pidHold=ON
-      |fd101_PC01pidHold=ON
-      |fd101_PC05pidHold=ON  
-      |fd101_RC01pidHold=ON
-    endif  
  
 
   case  fd101StepNum_RECIRC_TO_BOTTOM:
@@ -293,14 +313,6 @@ select &tempStepNum
     |fd101_DV01=ON // ON = flow from the bottom
     |fd101_DV02=ON
     |fd101_DV03=ON
-    // Freeze the PID controllers for the first few seconds of this state
-    if ((&fd101StepTimeAcc_m <= fd101StepTimeAcc_FREEZE_PIDS_m) \
-    and (&fd101StepTimeAcc_s10 < fd101StepTimeAcc_FREEZE_PIDS_s10)) then     
-      |fd101_DPC01pidHold=ON
-      |fd101_PC01pidHold=ON
-      |fd101_PC05pidHold=ON  
-      |fd101_RC01pidHold=ON
-    endif
 
 
   case  fd101StepNum_RECIRC_TO_TOP:
@@ -335,9 +347,9 @@ select &tempStepNum
     &fd101BWTimeAcc_m = 0
     // Fire the backwash device
     |fd101_BF01=ON
+    |fd101_IV06=OFF // OFF = Open the bypass
     // The flow through the membrane is from the top (because DV01 to DV03 are OFF)
     |fd101_IV05=ON
-    |fd101_IV06=OFF // OFF = Open the bypass
     // Freeze the PID Controllers for the duration of this state
     |fd101_DPC01pidHold=ON
     |fd101_PC01pidHold=ON
@@ -350,6 +362,24 @@ select &tempStepNum
       &fd101_BW_PT03max = &PT03_1000
     endif
 
+  case  fd101StepNum_RECIRC_BW_TOP_RETRACT:
+    // Increment step timer
+    &fd101StepTimeAcc_s10 = &fd101StepTimeAcc_s10 + &lastScanTimeShort
+    // Set the backwash timer to zero
+    &fd101BWTimeAcc_s10 = 0
+    &fd101BWTimeAcc_m = 0
+    // Retract the backwash device
+    |fd101_BF01=OFF
+    |fd101_IV06=OFF // OFF = Open the bypass
+    // The flow through the membrane is from the top (because DV01 to DV03 are OFF)
+    |fd101_IV05=ON
+    // Freeze the PID Controllers for the duration of this state
+    |fd101_DPC01pidHold=ON
+    |fd101_PC01pidHold=ON
+    |fd101_PC05pidHold=ON  
+    |fd101_RC01pidHold=ON
+    // Log the backwash pressures at every scan of the backwash
+    force_log
      
   case  fd101StepNum_RECIRC_BW_BOTTOM:
     // Increment step timer
@@ -376,6 +406,30 @@ select &tempStepNum
     if (&fd101_BW_PT03max < &PT03_1000) then
       &fd101_BW_PT03max = &PT03_1000
     endif
+
+     
+  case  fd101StepNum_RECIRC_BW_BOTTOM_RETRACT:
+    // Increment step timer
+    &fd101StepTimeAcc_s10 = &fd101StepTimeAcc_s10 + &lastScanTimeShort
+    // Set the backwash timer to zero
+    &fd101BWTimeAcc_s10 = 0
+    &fd101BWTimeAcc_m = 0
+    // Retract the backwash device
+    |fd101_BF01=OFF
+    |fd101_IV06=OFF // OFF = Open the bypass
+    //The flow through the membrane is from the bottom
+    |fd101_IV05=ON
+    |fd101_DV01=ON
+    |fd101_DV02=ON
+    |fd101_DV03=ON  
+    // Freeze the PID Controllers for the duration of this state
+    |fd101_DPC01pidHold=ON
+    |fd101_PC01pidHold=ON
+    |fd101_PC05pidHold=ON  
+    |fd101_RC01pidHold=ON
+    // Log the backwash pressures at every scan of the backwash
+    force_log
+
     
   case fd101StepNum_DRAIN_TOP:
     // Increment step timer
