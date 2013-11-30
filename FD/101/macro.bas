@@ -11,6 +11,10 @@
 // we are transitioning to the state "Recirc Top", i.e. the flow will become 
 // from the top.
 
+// The length of time to freeze the PID controllers after a direction change 
+// or backwash
+CONST fd101StepTimeAcc_FREEZE_PIDS_m = 0
+CONST fd101StepTimeAcc_FREEZE_PIDS_s10 = 100
 
 
 //Clear Sequence Outputs... these are then set on below
@@ -273,7 +277,15 @@ select &tempStepNum
     // Requires: time for this state > IV05 delay on + IV06 delay on (DV0{1,2,3} aren't changing)
     |fd101_IV05=ON // ON = Allow flow into membranes
     |fd101_IV06=ON // ON = Close the bypass
- 
+    // Freeze the PID controllers for the first few seconds of this state
+    if ((&fd101StepTimeAcc_m <= fd101StepTimeAcc_FREEZE_PIDS_m) \
+    and (&fd101StepTimeAcc_s10 < fd101StepTimeAcc_FREEZE_PIDS_s10)) then       
+      |fd101_DPC01pidHold=ON
+      |fd101_PC01pidHold=ON
+      |fd101_PC05pidHold=ON  
+      |fd101_RC01pidHold=ON
+      force_log
+    endif   
 
   case  fd101StepNum_RECIRC_TO_BOTTOM:
     // In this state we're changing to a membrane flow that will be from the bottom
@@ -313,7 +325,15 @@ select &tempStepNum
     |fd101_DV01=ON // ON = flow from the bottom
     |fd101_DV02=ON
     |fd101_DV03=ON
-
+    // Freeze the PID controllers for the first few seconds of this state
+    if ((&fd101StepTimeAcc_m <= fd101StepTimeAcc_FREEZE_PIDS_m) \
+    and (&fd101StepTimeAcc_s10 < fd101StepTimeAcc_FREEZE_PIDS_s10)) then     
+      |fd101_DPC01pidHold=ON
+      |fd101_PC01pidHold=ON
+      |fd101_PC05pidHold=ON  
+      |fd101_RC01pidHold=ON
+      force_log
+    endif
 
   case  fd101StepNum_RECIRC_TO_TOP:
     // In this state we're changing to a membrane flow that will be from the top

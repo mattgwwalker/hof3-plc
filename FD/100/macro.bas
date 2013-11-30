@@ -170,6 +170,7 @@ select &tempStepNum
    &tempStepNum = fd100StepNum_DRAIN2STORE 
   ENDIF 
  
+ 
  case fd100StepNum_PB: //***Awaiting Start From Pushbutton
   IF (&PB01State=PB01Pressed) THEN
    &tempStepNum = fd100StepNum_END 
@@ -185,6 +186,7 @@ select &tempStepNum
   IF (&fd100cmdOns=fd100cmd_ABORT) THEN
    &tempStepNum = fd100StepNum_WAITINS  
   ENDIF
+ 
   
  case fd100StepNum_END: //Wait for ACK from RPi
   //If Ack Command from RPi then go back to waiting for new instruction  
@@ -199,6 +201,7 @@ select &tempStepNum
   IF (&fd100cmdOns=fd100cmd_ABORT) THEN
    &tempStepNum = fd100StepNum_WAITINS  
   ENDIF    
+
 
  case fd100StepNum_FILL: //Fill Feedtank
   //Start Recirc After Feedtank reaches min level. 
@@ -215,21 +218,24 @@ select &tempStepNum
    &tempStepNum = fd100StepNum_WAITINS  
   ENDIF 
 
+
  case fd100StepNum_MIX: //Mix Via Bypass Line
-  //Stop Recirculation if level drops too low. 
+  // Stop Recirculation if level drops too low. 
   IF (&LT01_100 < (&LT01SP03 - &LT01SP04)) THEN
    &tempStepNum = fd100StepNum_FILL 
   ENDIF
-  //Mix Time Before Recirculating through HOF
-  IF ((&fd100StepTimeAcc_m >= &fd100StepTimePre_MIX_m)\
-   AND (&fd100StepTimeAcc_s10 >= &fd100StepTimePre_MIX_s10)\
-   AND (&fd100StepTimePre_MIX_s10 >= 0)\
-   AND (|fd102_fd100_dosingChem=OFF)\
-   AND (((&fd100Temperature = fd100Temperature_HEAT) AND (&TT01_100 > &TT01SP01))\
-    OR ((&fd100Temperature = fd100Temperature_COOL) AND (&TT01_100 < &TT01SP01)))) THEN
-   &tempStepNum = fd100StepNum_RECIRC  
+  // Mix Time Before Recirculating through HOF
+  IF &fd100StepTimeAcc_m >= &fd100StepTimePre_MIX_m\
+  AND &fd100StepTimeAcc_s10 >= &fd100StepTimePre_MIX_s10\
+  AND &fd100StepTimePre_MIX_s10 >= 0\
+  AND |fd102_fd100_dosingChem=OFF\
+  AND (    (&fd100Temperature = fd100Temperature_HEAT AND &TT01_100 > &TT01SP01)\
+        OR (&fd100Temperature = fd100Temperature_COOL AND &TT01_100 < &TT01SP01)\
+        OR (&fd100Temperature = fd100Temperature_NONE)\
+       ) THEN
+    &tempStepNum = fd100StepNum_RECIRC  
   ENDIF
-  //Stop Production or CIP Chemical Wash  
+  // Stop Production or CIP Chemical Wash  
   IF (&fd100cmdOns=fd100cmd_stop) THEN
    &tempStepNum = fd100StepNum_END 
   ENDIF
