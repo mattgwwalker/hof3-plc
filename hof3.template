@@ -85,6 +85,8 @@ INCLUDE "{ROOT}\reset_macro.bas"
 //functions
 INCLUDE "{ROOT}\_PID\function.bas"
 INCLUDE "{ROOT}\_VV\function.bas"
+INCLUDE "{ROOT}\FD\100\functions.bas"
+INCLUDE "{ROOT}\FD\101\functions.bas"
 
 //****************************************************************** MAIN MACRO
 main_macro:

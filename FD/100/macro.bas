@@ -145,6 +145,7 @@ endsel
 // Step Transisitions
 // ******************
 
+
 &tempStepNum = &fd100StepNum
 select &tempStepNum
  case  fd100StepNum_RESET: //***Powerup and Reset State
@@ -173,19 +174,25 @@ select &tempStepNum
  
  case fd100StepNum_PB: //***Awaiting Start From Pushbutton
   IF (&PB01State=PB01Pressed) THEN
+   // Log the start event
+   &EventID = EventID_STARTED
+   force_log
+   &EventID = EventID_NONE
+
+   // Move to END state to signal that the pushbutton has been pressed, 
+   // and we're ready to go to the next step
    &tempStepNum = fd100StepNum_END 
   ENDIF
   //If Stop Command from RPi then go back to waiting for new instruction  
   IF (&fd100cmdOns=fd100cmd_stop) THEN
+   gosub logStopEvent
    &tempStepNum = fd100StepNum_WAITINS 
   ENDIF
   //If PB01 not push within a time period go back to waiting for new instruction
   IF ((&fd100StepTimeAcc_m >= &fd100StepTimePre_PB_m) AND (&fd100StepTimeAcc_s10 >= &fd100StepTimePre_PB_s10)) THEN
    &tempStepNum = fd100StepNum_WAITINS  
   ENDIF
-  IF (&fd100cmdOns=fd100cmd_ABORT) THEN
-   &tempStepNum = fd100StepNum_WAITINS  
-  ENDIF
+  gosub checkForAbort
  
   
  case fd100StepNum_END: //Wait for ACK from RPi
@@ -195,12 +202,11 @@ select &tempStepNum
   ENDIF
   //If Stop Command from RPi then go back to waiting for new instruction  
   IF (&fd100cmdOns=fd100cmd_stop) THEN
+   gosub logStopEvent
    &tempStepNum = fd100StepNum_WAITINS 
   ENDIF
   //If Abort Command from RPi then go back to waiting for new instruction  
-  IF (&fd100cmdOns=fd100cmd_ABORT) THEN
-   &tempStepNum = fd100StepNum_WAITINS  
-  ENDIF    
+  gosub checkForAbort
 
 
  case fd100StepNum_FILL: //Fill Feedtank
@@ -212,11 +218,10 @@ select &tempStepNum
    &tempStepNum = fd100StepNum_MIX 
   ENDIF
   IF (&fd100cmdOns=fd100cmd_stop) THEN
+   gosub logStopEvent
    &tempStepNum = fd100StepNum_END 
   ENDIF
-  IF (&fd100cmdOns=fd100cmd_ABORT) THEN
-   &tempStepNum = fd100StepNum_WAITINS  
-  ENDIF 
+  gosub checkForAbort
 
 
  case fd100StepNum_MIX: //Mix Via Bypass Line
@@ -237,11 +242,11 @@ select &tempStepNum
   ENDIF
   // Stop Production or CIP Chemical Wash  
   IF (&fd100cmdOns=fd100cmd_stop) THEN
+   gosub logStopEvent
    &tempStepNum = fd100StepNum_END 
   ENDIF
-  IF (&fd100cmdOns=fd100cmd_ABORT) THEN
-   &tempStepNum = fd100StepNum_WAITINS  
-  ENDIF
+  gosub checkForAbort
+
 
  case fd100StepNum_RECIRC: //Production or CIP Chemical Wash - Recirc To Mix
   //Stop Recirculation if level drops too low. 
@@ -268,10 +273,9 @@ select &tempStepNum
   IF (&fd100cmdOns=fd100cmd_stop) THEN
    &tempStepNum = fd100StepNum_END 
   ENDIF
-  IF (&fd100cmdOns=fd100cmd_ABORT) THEN
-   &tempStepNum = fd100StepNum_WAITINS  
-  ENDIF
+  gosub checkForAbort
   
+
  case  fd100StepNum_CONC: //Production - Circulate through filter
   //Stop Concentration if level drops too low. 
   IF (&LT01_100 < (&LT01SP03 - &LT01SP04)) THEN
@@ -284,59 +288,54 @@ select &tempStepNum
     &tempStepNum = fd100StepNum_MT2SITE  
   ENDIF  
   IF (&fd100cmdOns=fd100cmd_stop) THEN
+   gosub logStopEvent
    &tempStepNum = fd100StepNum_MT2SITE 
   ENDIF
-  IF (&fd100cmdOns=fd100cmd_ABORT) THEN
-   &tempStepNum = fd100StepNum_WAITINS  
-  ENDIF
+  gosub checkForAbort
    
+
  case fd100StepNum_MT2SITE: //Production - Empty Feedtank To Site
   //Feed Tank Reached Min Level. 
   IF (&LT01_100 < &LT01SP05) THEN
    &tempStepNum = fd100StepNum_END
   ENDIF
-  IF (&fd100cmdOns=fd100cmd_ABORT) THEN
-   &tempStepNum = fd100StepNum_WAITINS  
-  ENDIF 
+  gosub checkForAbort
   
+
  case fd100StepNum_MT2DRAIN: //Production or CIP Chemical Wash - Pump Feedtank To Drain
   //Feed Tank Reached Empty Level. 
   IF (&LT01_100 < &LT01SP06) THEN
    &tempStepNum = fd100StepNum_DRAIN
   ENDIF
-  IF (&fd100cmdOns=fd100cmd_ABORT) THEN
-   &tempStepNum = fd100StepNum_WAITINS  
-  ENDIF  
+  gosub checkForAbort
   
+
  case fd100StepNum_DRAIN: //Production or CIP Chemical Wash - Drain Plant
   //Drain Plant Time
   IF ((&fd100StepTimeAcc_m >= &fd100StepTimePre_DRAIN_m)\
    AND (&fd100StepTimeAcc_s10 >= &fd100StepTimePre_DRAIN_s10)) THEN
     &tempStepNum = fd100StepNum_END  
   ENDIF
-  IF (&fd100cmdOns=fd100cmd_ABORT) THEN
-   &tempStepNum = fd100StepNum_WAITINS  
-  ENDIF  
+  gosub checkForAbort
   
+
  case fd100StepNum_MT2STORE: //Production or CIP Chemical Wash - Pump Feedtank To Drain
   //Feed Tank Reached Empty Level. 
   IF (&LT01_100 < &LT01SP06) THEN
    &tempStepNum = fd100StepNum_DRAIN2STORE
   ENDIF
-  IF (&fd100cmdOns=fd100cmd_ABORT) THEN
-   &tempStepNum = fd100StepNum_WAITINS  
-  ENDIF  
+  gosub checkForAbort
   
+
  case fd100StepNum_DRAIN2STORE: //Production or CIP Chemical Wash - Drain Plant
   //Drain Plant Time
   IF ((&fd100StepTimeAcc_m >= &fd100StepTimePre_DRAIN_m)\
    AND (&fd100StepTimeAcc_s10 >= &fd100StepTimePre_DRAIN_s10)) THEN
     &tempStepNum = fd100StepNum_END  
   ENDIF
-  IF (&fd100cmdOns=fd100cmd_ABORT) THEN
-   &tempStepNum = fd100StepNum_WAITINS  
-  ENDIF  
+  gosub checkForAbort
    
+
  default:
   &tempStepNum = fd100StepNum_RESET
 endsel
@@ -354,6 +353,7 @@ IF (&tempStepNum != &fd100StepNum) THEN
  &fd100StepNum = &tempStepNum
  &fd100StepTimeAcc_s10 = 0
  &fd100StepTimeAcc_m = 0 
+
  select &tempStepNum
   case fd100StepNum_RESET: //Powerup and Reset State
    // Reset FT02's over-max-flow timer
@@ -364,19 +364,39 @@ IF (&tempStepNum != &fd100StepNum) THEN
    &FT03_OverMaxFlowTimeAcc_s10 = 0
    &FT03_OverMaxFlowTimeAcc_m = 0
   
+
   case fd100StepNum_WAITINS: //Awaiting Instruction
    &fd100TimeAcc_RECIRC_s10 = 0
    &fd100TimeAcc_RECIRC_m = 0
   
+
   case fd100StepNum_PB: //Awaiting Pushbutton
   
+
   case fd100StepNum_END: //End wait for Acknowledgement from RPi  
+   // Log the fact that we've finished whatever we were doing
+   &EventID = EventID_FINISHED
+   force_log
+   &EventID = EventID_NONE
+   
   
+
   case fd100StepNum_FILL: //Production or CIP Chemical Wash - Fill Feedtank
+   // Log the fact that filling's started
+   &EventID = EventID_FILLING_STARTED
+   force_log
+   &EventID = EventID_NONE
+   
    &PC05cv=&PC05cv01 //Open CV01 to enable recirc
    &fd100_LT01max = 0 
    
+
   case fd100StepNum_MIX: //Production or CIP Chemical Wash - Mix Via Bypass Line
+   // Log the fact that mixing's started
+   &EventID = EventID_MIXING_STARTED
+   force_log
+   &EventID = EventID_NONE
+
    &DPC01cv=&DPC01cv01 //Set PC01sp to control the speed of the Main Feed Pump
    &PC01cv=&PC01cv01 //Set Initial the speed of the Main Feed Pump
    if (&fd100FillSource = fd100FillSource_NONE) then
@@ -398,23 +418,52 @@ IF (&tempStepNum != &fd100StepNum) THEN
     &fd100Status = fd100Status_UNKNOWN //Set Plant Status
    endif   
 
+
   case fd100StepNum_RECIRC: //Production or CIP Chemical Wash - Recirc through filter
+   // Log the fact that recirc's started
+   &EventID = EventID_RECIRC_STARTED
+   force_log
+   &EventID = EventID_NONE
+
    // Set up the PID controllers for Recirc 
    &DPC01sp=&DPC01sp01
    &PC05sp=&PC05sp01
    &PC03sp=&PC03sp01 // Backwash target pressure 
    &PC03cv=&PC03cv01 // Backwash's starting position
     
+
   case fd100StepNum_CONC: //Production - Concentrate
+   // Log the fact that recirc's started
+   &EventID = EventID_CONC_STARTED
+   force_log
+   &EventID = EventID_NONE
+
    &RC01cv=&RC01cv01 //Concentration Ratio Starting Value
    &RC01sp=&RC01sp01 //Concentration Ratio
    
+
   case fd100StepNum_MT2SITE: //Production - Empty Feedtank To Site
+   // Log the fact that we've started emptying to site
+   &EventID = EventID_MT2SITE_STARTED
+   force_log
+   &EventID = EventID_NONE
   
+
   case fd100StepNum_MT2DRAIN: //Production or CIP Chemical Wash - Pump Feedtank To Drain 
+   // Log the fact that we've started pumping to drain
+   &EventID = EventID_MT2DRAIN_STARTED
+   force_log
+   &EventID = EventID_NONE
+
    &PC01cv=&PC01cv02
    
+
   case fd100StepNum_DRAIN: //Production or CIP Chemical Wash - Empty Feedtank To Drain
+   // Log the fact that we've started passive draining
+   &EventID = EventID_DRAIN_STARTED
+   force_log
+   &EventID = EventID_NONE
+
    if (&fd100FillSource = fd100FillSource_NONE) then
     &fd100Status = fd100Status_PROD_MT //Set Plant Status
    endif
@@ -434,10 +483,22 @@ IF (&tempStepNum != &fd100StepNum) THEN
     &fd100Status = fd100Status_UNKNOWN //Set Plant Status
    endif 
 
- case fd100StepNum_MT2STORE: //Production or CIP Chemical Wash - Pump Feedtank To Drain 
+
+  case fd100StepNum_MT2STORE: //Production or CIP Chemical Wash - Pump Feedtank To Drain 
+   // Log the fact that we've started passive draining
+   &EventID = EventID_MT2STORE_STARTED
+   force_log
+   &EventID = EventID_NONE
+
    &PC01cv=&PC01cv02
    
+
   case fd100StepNum_DRAIN2STORE: //Production or CIP Chemical Wash - Empty Feedtank To Drain
+   // Log the fact that we've started passive draining
+   &EventID = EventID_DRAIN2STORE_STARTED
+   force_log
+   &EventID = EventID_NONE
+
    if (&fd100FillSource = fd100FillSource_NONE) then
     &fd100Status = fd100Status_PROD_MT //Set Plant Status
    endif
@@ -458,6 +519,7 @@ IF (&tempStepNum != &fd100StepNum) THEN
    endif     
          
   default:
+
  endsel
 ENDIF
 
