@@ -1,0 +1,109 @@
+\documentclass{article}
+
+\begin{document}
+
+\section*{Calculating the Concentration Ratio}
+
+To calculate the concentration ratio, $r_t$, of the plant's current contents, we measure (for any time $t$):
+\begin{itemize}
+\item The volume of product in the system, $v_t$
+\item The flow of permeate, $f_2,t$
+\item The flow of retentate, $f_3,t$
+\end{itemize}
+
+The volume of permeate, $v_{2,t}$ can be calculated from the flow rate and the duration of time, $\Delta t$:
+\begin{equation}
+  v_{2,t} = f_{2,t} \cdot \Delta t
+\end{equation}
+
+In a similar way, we can calculate the volume of retentate:
+\begin{equation}
+  v_{3,t} = f_{3,t} \cdot \Delta t
+\end{equation}
+
+
+From those measurements we can calculate the volume going into the system
+\begin{equation}
+  v_{1,t} = v_{t} - v_{t-1} + v_{2,t} + v_{3,t}
+  \label{eq:v1}
+\end{equation}
+
+To make the calculation for the concentration ratio, we must consider the mass of solids.
+
+We begin by saying that product going into the tank has a concentration ratio of one (i.e.~it is full-strength product).  This product has a solids content of $C$.  It is unimportant what units are used for $C$, but for instance it could be measured as grams per litre.
+
+We wish to know the mass of solids in the system, $m_t$, at time $t$.  This can be calculated from the volume of liquid in the system, its current concentration ratio and the solids content of full-strength product:
+\begin{equation}
+  m_t = v_t \cdot r_t \cdot C
+\end{equation}
+
+Equally, the mass of the system at time $t-1$ can be calculated:
+\begin{equation}
+  m_{t-1} = v_{t-1} \cdot r_{t-1} \cdot C
+\end{equation}
+
+The mass of solids going into the system ($m_1$) is the volume going in ($v_{1,t}$), multiplied by the ratio of full-strength product (one), multiplied by the solids content of full-strength product ($C$):
+\begin{equation}
+  m_{1,t} = v_{1,t}  \cdot C
+\end{equation}
+
+The mass of solids going out via the retentate line, $m_3$ is the product of the volume out of the retentate line, the concentration ratio of the system and the solids content of full-strength product.  We use $r_{t-1}$ as a convenient   approximation for the concentration ratio.
+\begin{equation}
+  m_{3,t} = v_{3,t}  \cdot r_{t-1} \cdot C
+\end{equation}
+
+The mass of solids going out the permeate line, $m_2$, is the product of the volume out of the permeate line, the concentration ratio of the system, the solids content of full-strength product and a $k$ factor which designates the proportion of solids that pass via the permeate line.  A $k$ factor of 0 would mean that no solids permeate the membrane, while a $k$ factor of one would indicate the membrane was not filtering the product.  It is possible the $k$-factor is dependent on the current concentration ratio, but this effect will not be considered.
+\begin{equation}
+  m_{2,t} = v_{2,t}  \cdot r_{t-1} \cdot C \cdot k
+\end{equation}
+
+The solids content of the system at time $t$ is the solids content of the system at time $t-1$ plus the solids added into the system, $m_{1,t}$, less the solids removed via the permeate line $m_{2,t}$, less the solids removed via the retentate line $m_{3,t}$:
+\begin{equation}
+  m_t = m_{t-1} + m_{1,t} - m_{2,t} - m_{3,t}
+\end{equation}
+
+Replacing the masses with their respective volume-based equivalents gives:
+\begin{equation}
+  m_t = v_t \cdot r_t \cdot C
+  	= v_{t-1} \cdot r_{t-1} \cdot C 
+   	+ v_{1,t}  \cdot C
+	- v_{2,t}  \cdot r_{t-1} \cdot C \cdot k
+	- v_{3,t}  \cdot r_{t-1} \cdot C
+\end{equation}
+
+Eliminating $C$ gives:
+\begin{equation}
+  v_t \cdot r_t
+  	= v_{t-1} \cdot r_{t-1}
+   	+ v_{1,t}
+	- v_{2,t}  \cdot r_{t-1} \cdot k
+	- v_{3,t}  \cdot r_{t-1}
+\end{equation}
+
+We then replace $v_{1,t}$ with what we are measuring (from equation~\ref{eq:v1}):
+\begin{equation}
+  v_t \cdot r_t
+  	= v_{t-1} \cdot r_{t-1}
+	+ v_{t} - v_{t-1} + v_{2,t} + v_{3,t}
+	- v_{2,t}  \cdot r_{t-1} \cdot k
+	- v_{3,t}  \cdot r_{t-1}
+\end{equation}
+
+And then factor out the repeating expressions to get:
+\begin{equation}
+  v_t \cdot r_t
+  	= v_{t-1} \cdot (r_{t-1} -1)
+	+ v_{t} + v_{2,t}(1 - r_{t-1} \cdot k)  
+	+ v_{3,t}(1 - r_{t-1})
+\end{equation}
+
+Divide both sides by $v_t$ gives:
+\begin{equation}
+  r_t
+  	= 1+\frac{v_{t-1} \cdot (r_{t-1} -1)
+	+ v_{2,t}(1 - r_{t-1} \cdot k)  
+	+ v_{3,t}(1 - r_{t-1})}{v_t}
+\end{equation}
+
+
+\end{document}
