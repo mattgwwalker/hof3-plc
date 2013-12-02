@@ -21,3 +21,17 @@ logStopEvent:
   return
  
 
+// Log a timer-based event
+logTimerEvent:
+  &EventID = EventID_ON_TIMER
+  force_log
+  &EventID = EventID_NONE
+  return
+
+
+// Log a fault-based event
+logFaultEvent:
+  &EventID = EventID_FAULT + &fd100Faultcmd_resetMsg
+  force_log
+  &EventID = EventID_NONE
+  return

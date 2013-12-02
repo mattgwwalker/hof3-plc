@@ -135,6 +135,8 @@ select &tempStepNum
       &tempStepNum = fd101StepNum_RECIRC_TOP
       &fd101_BW_count = &fd101_BW_count + 1
       |fd101_PC03calc = ON
+      // Log the maximum backwash pressure
+      gosub logMaxBackwashPressure
     endif
 
     
@@ -164,6 +166,8 @@ select &tempStepNum
       &tempStepNum = fd101StepNum_RECIRC_BOTTOM
       &fd101_BW_count = &fd101_BW_count + 1
       |fd101_PC03calc = ON
+      // Log the maximum backwash pressure
+      gosub logMaxBackwashPressure
     endif
 
 
@@ -289,9 +293,7 @@ select &tempStepNum
       |fd101_PC01pidHold=ON
       |fd101_PC05pidHold=ON  
       |fd101_RC01pidHold=ON
-      &EventID = EventID_DURING_FREEZE_PIDS
-      force_log
-      &EventID = EventID_NONE
+      gosub logFreezePIDsEvent
     endif   
 
   case  fd101StepNum_RECIRC_TO_BOTTOM:
@@ -339,9 +341,7 @@ select &tempStepNum
       |fd101_PC01pidHold=ON
       |fd101_PC05pidHold=ON  
       |fd101_RC01pidHold=ON
-      &EventID = EventID_DURING_FREEZE_PIDS
-      force_log
-      &EventID = EventID_NONE
+      gosub logFreezePIDsEvent
     endif
 
   case  fd101StepNum_RECIRC_TO_TOP:
@@ -385,9 +385,7 @@ select &tempStepNum
     |fd101_PC05pidHold=ON  
     |fd101_RC01pidHold=ON
     // Log the backwash pressures at every scan of the backwash
-    &EventID = EventID_DURING_BACKWASH
-    force_log
-    &EventID = EventID_NONE
+    gosub logDuringBackwashEvent
     // Get the maximum pressure of the backwash
     if (&fd101_BW_PT03max < &PT03_1000) then
       &fd101_BW_PT03max = &PT03_1000
@@ -410,10 +408,9 @@ select &tempStepNum
     |fd101_PC05pidHold=ON  
     |fd101_RC01pidHold=ON
     // Log the backwash pressures at every scan of the backwash
-    &EventID = EventID_DURING_BACKWASH_RETRACT
-    force_log
-    &EventID = EventID_NONE
-     
+    gosub logDuringBackwashRetractEvent
+    
+         
   case  fd101StepNum_RECIRC_BW_BOTTOM:
     // Increment step timer
     &fd101StepTimeAcc_s10 = &fd101StepTimeAcc_s10 + &lastScanTimeShort
@@ -434,9 +431,7 @@ select &tempStepNum
     |fd101_PC05pidHold=ON  
     |fd101_RC01pidHold=ON
     // Log the backwash pressures at every scan of the backwash
-    &EventID = EventID_DURING_BACKWASH
-    force_log
-    &EventID = EventID_NONE
+    gosub logDuringBackwashEvent
     // Get the maximum pressure of the backwash
     if (&fd101_BW_PT03max < &PT03_1000) then
       &fd101_BW_PT03max = &PT03_1000
@@ -463,9 +458,7 @@ select &tempStepNum
     |fd101_PC05pidHold=ON  
     |fd101_RC01pidHold=ON
     // Log the backwash pressures at every scan of the backwash
-    &EventID = EventID_DURING_BACKWASH_RETRACT
-    force_log
-    &EventID = EventID_NONE
+    gosub logDuringBackwashRetractEvent
 
     
   case fd101StepNum_DRAIN_TOP:

@@ -84,3 +84,7 @@ MEM &fd101_BW_PT03max = 0
 REG &fd101_BW_count = &USER_MEMORY_953
 MEM &fd101_BW_count = 0
 
+// User memory 954 and 955 used above
+
+REG &fd101_BW_LoggingEnabled = &USER_MEMORY_956
+MEM &fd101_BW_LoggingEnabled = 0

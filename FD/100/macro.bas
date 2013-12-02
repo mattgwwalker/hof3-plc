@@ -11,6 +11,7 @@
 // step transitions, the one-shot actions, and the step actions that
 // happen every scan.
 
+
 // Clear Sequence Outputs.  These registers are used to hold bit-wise
 // values such as whether pump PP01 should be turned on.  By setting
 // these registers to zero, all those bits are cleared in each scan,
@@ -18,6 +19,24 @@
 // The declaration for each bit can be found in _USER_MEMORY.bas.
 &fd100ProgOut01 = 0 
 &fd100ProgOut02 = 0
+
+
+
+// If the logging timer is enabled (i.e. has a positive value) then 
+// increment it and check if we're ready to log  
+if &fd100LogTimePre_s10 >= 0 then
+  // Timer is enabled, increment it
+  &fd100LogTimeAcc_s10 = &fd100LogTimeAcc_s10 + &lastScanTimeShort
+  // Check if it's time to log
+  if &fd100LogTimeAcc_m >= &fd100LogTimePre_m\
+  and &fd100LogTimeAcc_s10 >= &fd100LogTimePre_s10 then
+    // Log timer-based event
+    gosub logTimerEvent
+    // Reset timer
+    &fd100LogTimeAcc_m = 0
+    &fd100LogTimeAcc_s10 = 0
+  endif
+endif
 
 //Create ONESHOT function for PB01... which is used to start sequence
 IF (|PB01_I = ON) THEN
@@ -32,6 +51,7 @@ ELSE
   |PB01_1 = OFF
   |PB01_2 = OFF
 ENDIF
+
 
 //Selection From RPi
 &OPmsg = 0
@@ -148,10 +168,12 @@ endsel
 
 &tempStepNum = &fd100StepNum
 select &tempStepNum
- case  fd100StepNum_RESET: //***Powerup and Reset State
+
+ case  fd100StepNum_RESET: //*** Powerup and Reset State
   &tempStepNum = fd100StepNum_WAITINS
 
- case fd100StepNum_WAITINS: //***Awaiting Instruction From RPi
+
+ case fd100StepNum_WAITINS: //*** Awaiting Instruction From RPi
   IF (&fd100cmdOns=fd100cmd_PB) THEN
    &tempStepNum = fd100StepNum_PB 
   ENDIF
@@ -170,9 +192,15 @@ select &tempStepNum
   IF ((&fd100cmdOns=fd100cmd_STORE) AND (|PS01_I = OFF)) THEN
    &tempStepNum = fd100StepNum_DRAIN2STORE 
   ENDIF 
+
+  // If we're changing states, start the logging timer
+  if &tempStepNum != fd100StepNum_WAITINS then
+   &fd100LogTimeAcc_s10 = 0
+   &fd100LogTimeAcc_m = 0
+  endif
+   
  
- 
- case fd100StepNum_PB: //***Awaiting Start From Pushbutton
+ case fd100StepNum_PB: //*** Awaiting Start From Pushbutton
   IF (&PB01State=PB01Pressed) THEN
    // Log the start event
    &EventID = EventID_STARTED
@@ -369,6 +397,10 @@ IF (&tempStepNum != &fd100StepNum) THEN
    &fd100TimeAcc_RECIRC_s10 = 0
    &fd100TimeAcc_RECIRC_m = 0
   
+   // Disable timer-based logging while awaiting instruction
+   &fd100LogTimeAcc_s10 = -10
+
+
 
   case fd100StepNum_PB: //Awaiting Pushbutton
   
@@ -535,11 +567,13 @@ select &tempStepNum
   &R01_last = 1.0
   &R01 = 1.0
   
+
  case fd100StepNum_WAITINS: //Awaiting Instruction
   &V1x_last = 0.0
   &R01_last = 1.0
   &R01 = 1.0 
  
+
  case fd100StepNum_PB: //Awaiting Pushbutton
   &V1x_last = 0.0
   &R01_last = 1.0
@@ -547,11 +581,13 @@ select &tempStepNum
   &fd100StepTimeAcc_s10 = &fd100StepTimeAcc_s10 + &lastScanTimeShort
   |fd100_IL01waiting = ON //PB01 LED Light To flash to incidate wait condition
   
+
  case fd100StepNum_END: //End wait for Acknowledgement from RPi
   &V1x_last = 0.0
   &R01_last = 1.0
   &R01 = 1.0   
   
+
  case fd100StepNum_FILL: //Production or CIP Chemical Wash - Fill Feedtank
    if ((&LT01_100 <= &fd100_LT01max + 100) AND (|fd100Fault_fd100_Pause=OFF)) then // 100 = 1%
     &fd100StepTimeAcc_s10 = &fd100StepTimeAcc_s10 + &lastScanTimeShort
@@ -570,6 +606,7 @@ select &tempStepNum
   |fd100_PP03en1 = ON //Fill from Storage Tank 
   |fd100_PC05so = ON //Open CV01 to enable recirc
  
+
  case fd100StepNum_MIX: //Production or CIP Chemical Wash - Mix Via Bypass Line
   if (|fd100Fault_fd100_Pause=OFF) then
    if (&fd100StepTimePre_MIX_s10 >= 0) then
@@ -678,6 +715,7 @@ select &tempStepNum
   |fd100Temperatureen1 = ON //Cool or Heat As Selected 
   |fd100_fd101_recirc = ON //Start Route Sequence 
    
+
  case fd100StepNum_MT2DRAIN: //Production or CIP Chemical Wash - Pump Feedtank To Drain
   |fd100_fd100Fault_enable1 = ON  
   |fd100_IL01 = ON //PB01 LED Light 
@@ -689,6 +727,7 @@ select &tempStepNum
   &R01_last = 1.0
   &R01 = 1.0  
   
+
  case fd100StepNum_DRAIN: //Production or CIP Chemical Wash - Empty Feedtank To Drain
   IF (&LT01_100 < &LT01SP06) THEN
    &fd100StepTimeAcc_s10 = &fd100StepTimeAcc_s10 + &lastScanTimeShort
@@ -701,6 +740,7 @@ select &tempStepNum
   &R01_last = 1.0
   &R01 = 1.0
   
+
  case fd100StepNum_MT2STORE: //Production or CIP Chemical Wash - Pump Feedtank To Store
   |fd100_DV05 = ON
   |fd100_fd100Fault_enable1 = ON  
@@ -713,6 +753,7 @@ select &tempStepNum
   &R01_last = 1.0
   &R01 = 1.0  
   
+
  case fd100StepNum_DRAIN2STORE: //Production or CIP Chemical Wash - Empty Feedtank To Store
   IF (&LT01_100 < &LT01SP06) THEN
    &fd100StepTimeAcc_s10 = &fd100StepTimeAcc_s10 + &lastScanTimeShort
@@ -727,7 +768,14 @@ select &tempStepNum
   &R01 = 1.0
      
  default:
+
 endsel
+
+
+
+// *************
+// Timer Updates
+// *************
 
 //Step Timer Update Minutes when seconds greater than 59.9s
 if (&fd100StepTimeAcc_s10 > 599) then
@@ -763,6 +811,15 @@ if (&FT03_OverMaxFlowTimeAcc_s10 > 599) then
 endif
 if (&FT03_OverMaxFlowTimeAcc_m > 32000) then
   &FT03_OverMaxFlowTimeAcc_m = 32000
+endif
+
+// Logging timer, update minutes when seconds greater than 59.9s
+if (&fd100LogTimeAcc_s10 > 599) then
+  &fd100LogTimeAcc_s10 = &fd100LogTimeAcc_s10 - 600
+  &fd100LogTimeAcc_m = &fd100LogTimeAcc_m + 1
+endif
+if (&fd100LogTimeAcc_m > 32000) then
+  &fd100LogTimeAcc_m = 32000
 endif
 
 
@@ -828,6 +885,7 @@ endif
 
 //Clear Sequence Outputs... these are then set on below
 &fd100FaultProgOut01 = 0
+
 //Step Transistions
 &tempStepNum = &fd100FaultStepNum
 select &tempStepNum 
@@ -862,10 +920,17 @@ endsel
 IF (&tempStepNum != &fd100FaultStepNum) THEN
  &fd100FaultStepNum = &tempStepNum 
  select &tempStepNum
+
   case fd100Fault_reset:
+
   case fd100Fault_monitor1:
+
   case fd100Fault_action1:         
+   // Log the fault
+   gosub logFaultEvent   
+
   default:
+
  endsel
 ENDIF
 
@@ -895,8 +960,4 @@ select &tempStepNum
  default:
  
 endsel
-
- 
-
-
 

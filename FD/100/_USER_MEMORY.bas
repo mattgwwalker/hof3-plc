@@ -1,5 +1,5 @@
 //FD100 USER_MEMORY registers
-//** &USER_MEMORY_890 to &USER_MEMORY_929 currently allocated ** 
+//** &USER_MEMORY_880 to &USER_MEMORY_929 currently allocated ** 
 
 REG &fd100cmd = &USER_MEMORY_890
 MEM &fd100cmd = 0
@@ -215,5 +215,15 @@ CONST fd100Temperature_COOL = 2 //Cool to Setpoint
 MEM &fd100Temperature = fd100Temperature_NONE
 
 
+// Logging frequency (timer-based)
+REG &fd100LogTimePre_s10 = &USER_MEMORY_888
+MEM &fd100LogTimePre_s10 = -10
+REG &fd100LogTimePre_m = &USER_MEMORY_889
+MEM &fd100LogTimePre_m = 0
 
+// Logging timer
+REG &fd100LogTimeAcc_s10 = &USER_MEMORY_886
+MEM &fd100LogTimeAcc_s10 = 0
+REG &fd100LogTimeAcc_m = &USER_MEMORY_887
+MEM &fd100LogTimeAcc_m = 0
 
