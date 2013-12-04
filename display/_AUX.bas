@@ -1,3 +1,10 @@
+// The display's startup text occurs on boot-up for a second or so.  
+// There are two lines of up to 16 characters each.
+//                         1234567890123456
+MEM &STARTUP_TEXT_LINE1 = "      HOF3      "
+MEM &STARTUP_TEXT_LINE2 = "                "
+
+
 // We allocate registers AUX10 to 13 for the display of zero through to three 
 // decimal places.  This is necessary as we seem unable to specify this on
 // the fly: &CURRENT_DISPLAY_FORMAT does not seem to work as documented.
