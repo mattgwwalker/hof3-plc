@@ -4,20 +4,27 @@
 
 &DPT01_1000 = &PT01_1000 - &PT02_1000
 
+// Ensure the differential pressure is between zero and 5 bar
 IF (&DPT01_1000 < 0 ) THEN 
- &DPC01pv = 0
+  &DPC01pv = 0
 ELSIF (&DPT01_1000 > 5000 ) THEN 
- &DPC01pv = 5000
+  &DPC01pv = 5000
 ELSE
- &DPC01pv = &DPT01_1000
+  &DPC01pv = &DPT01_1000
 ENDIF
 
+
 if (|fd100_DPC01pidEn1=ON) then
- if ((|fd100Fault_DPC01pidHold=OFF) and (|fd101_DPC01pidHold=OFF)) then 
-  |fd100_DPC01pid=ON
- else
-  |fd100_DPC01so=ON
- endif
+  // We're being asked to engage the PID controller ...
+  if ((|fd100Fault_DPC01pidHold=OFF) and (|fd101_DPC01pidHold=OFF)) then 
+    // ... and we're not begin asked to freeze it, so we're effectively asking 
+    // for PID mode
+    |fd100_DPC01pid=ON
+  else
+    // ... but we're being asked to freeze it, so we're effectively asking for
+    // set-output mode
+    |fd100_DPC01so=ON
+  endif
 endif
 
 |DPC01progOutModePID = |fd100_DPC01pid
@@ -61,8 +68,13 @@ ENDIF
 &DPC01errLastLast = &PIDerrLastLast
 &DPC01tacc = &PIDtacc
 
+
+// If we're asking to turn off this controller, ensure the output is set to zero
+// immediately
 IF ((|fd100_DPC01pid=OFF) AND (|fd100_DPC01so=OFF) AND (|DPC01modeMan=OFF)) THEN
   |DPC01modeSpRamp = OFF
+  &DPC01spRampTarget = 0
+  &DPC01sp = 0
   &DPC01cv = 0
 ENDIF
 

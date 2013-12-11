@@ -34,8 +34,10 @@ MEM &fd100cmd_STORE_msg = 0
 
 REG &fd100Faultcmd = &USER_MEMORY_902
 MEM &fd100Faultcmd = 0
-CONST fd100Faultcmd_noAction = 0 //No Action
-CONST fd100Faultcmd_reset = 1 //Reset
+CONST fd100Faultcmd_NO_ACTION = 0      // No Action
+CONST fd100Faultcmd_RESET = 1          // Reset/Clear current fault [Not implemented]
+CONST fd100Faultcmd_ENABLE_FAULTS = 2  // Enable fault checking
+CONST fd100Faultcmd_DISABLE_FAULTS = 3 // Disable fault checking
 
 REG &fd100FaultcmdOns = &USER_MEMORY_903
 MEM &fd100FaultcmdOns = 0
@@ -157,11 +159,14 @@ MEM &fd100TimePre_RECIRC_s10 = 0
 REG &fd100TimePre_RECIRC_m = &USER_MEMORY_921
 MEM &fd100TimePre_RECIRC_m = 60
 
+
+
 REG &fd100FaultStepNum = &USER_MEMORY_922  
 MEM &fd100FaultStepNum = 0
-CONST fd100Fault_reset = 0
-CONST fd100Fault_monitor1 = 1
-CONST fd100Fault_action1 = 2
+CONST fd100Fault_reset = 0     // The reset state
+CONST fd100Fault_monitor1 = 1  // Faults are being monitored
+CONST fd100Fault_action1 =  2  // A fault has occurred
+CONST fd100Fault_disabled = 3  // Fault checking is disabled
 
 REG &fd100FaultProgOut01 = &USER_MEMORY_923
 MEM &fd100FaultProgOut01 = 0
@@ -180,6 +185,8 @@ BITREG &fd100FaultProgOut01 = [\
 |fd100Fault_fd100_Pause,\
 |fd100Fault_fd101_Pause,\
 |fd100Fault_fd102_Pause]
+
+
 
 REG &fd100FillSource = &USER_MEMORY_924
 CONST fd100FillSource_NONE = 0 //No fill source... manual fill required to operate

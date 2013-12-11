@@ -40,125 +40,168 @@ endif
 
 //Create ONESHOT function for PB01... which is used to start sequence
 IF (|PB01_I = ON) THEN
- IF (|PB01_1 = OFF) THEN
-  |PB01_1 = ON
-  |PB01_2 = OFF
- ELSE
-  |PB01_1 = ON
-  |PB01_2 = ON
- ENDIF
+  IF (|PB01_1 = OFF) THEN
+    |PB01_1 = ON
+    |PB01_2 = OFF
+  ELSE
+    |PB01_1 = ON
+    |PB01_2 = ON
+  ENDIF
 ELSE
   |PB01_1 = OFF
   |PB01_2 = OFF
 ENDIF
 
 
-//Selection From RPi
-&OPmsg = 0
- IF ((|ES01_I1 = OFF) OR (|ES01_I2 = ON)) THEN
-  &OPmsg = 3
- ELSIF (|PS01_I = OFF) THEN
-  &OPmsg = 4
- ELSIF (|PS02_I = OFF) THEN
-  &OPmsg = 5
- ELSIF (|PS03_I = OFF) THEN
-  &OPmsg = 6
- ELSIF (&fd100Status = fd100Status_RINSE_FULL) THEN
-  &OPmsg = 10
- ELSIF (&fd100Status = fd100Status_CIP_FULL) THEN
-  &OPmsg = 12
- ELSIF (&fd100Status = fd100Status_CIP_MT) THEN
-  &OPmsg = 13            
- ENDIF
-&fd100cmd_prod_msg = &OPmsg
+// Selection from Raspberry Pi
 
-&OPmsg = 0
- IF ((|ES01_I1 = OFF) OR (|ES01_I2 = ON)) THEN
-  &OPmsg = 3
- ELSIF (|PS01_I = OFF) THEN
-  &OPmsg = 4
- ELSIF (|PS02_I = OFF) THEN
-  &OPmsg = 5
- ELSIF (|PS03_I = OFF) THEN
-  &OPmsg = 6
- ELSIF (&fd100Status = fd100Status_RINSE_FULL) THEN
-  &OPmsg = 10
- ELSIF (&fd100Status = fd100Status_PROD_FULL) THEN
-  &OPmsg = 8
- ELSIF (&fd100Status = fd100Status_PROD_MT) THEN
-  &OPmsg = 9            
- ENDIF
-&fd100cmd_cip_msg = &OPmsg
+// If fault checking is disabled, then set the selection messages to 0, meaning
+// there is no fault detected.
+if &fd100FaultStepNum = fd100Fault_disabled then
+  // Faults are disabled
+  &fd100cmd_prod_msg = 0
+  &fd100cmd_cip_msg = 0
+  &fd100cmd_rinse_msg = 0
+  &fd100cmd_DRAIN_msg = 0
+  &fd100cmd_STORE_msg = 0
+else
+  // Faults are enabled
 
-&OPmsg = 0
- IF ((|ES01_I1 = OFF) OR (|ES01_I2 = ON)) THEN  //ESTOP
-  &OPmsg = 3
- ELSIF (|PS01_I = OFF) THEN  //Water Pressure
-  &OPmsg = 4
- ELSIF (|PS02_I = OFF) THEN  //High Pressure Air
-  &OPmsg = 5
- ELSIF (|PS03_I = OFF) THEN  //High Low Air
-  &OPmsg = 6
- ELSIF (&fd100Status = fd100Status_CIP_FULL) THEN
-  &OPmsg = 12
- ELSIF (&fd100Status = fd100Status_PROD_FULL) THEN
-  &OPmsg = 8           
- ENDIF
-&fd100cmd_rinse_msg = &OPmsg
+  // Check for faults that would inhibit the selection of 'production'
+  &OPmsg = 0
 
-&OPmsg = 0
- IF ((|ES01_I1 = OFF) OR (|ES01_I2 = ON)) THEN //ESTOP
-  &OPmsg = 3
- ELSIF (|PS02_I = OFF) THEN //High Pressure Air
-  &OPmsg = 5
- ELSIF (|PS03_I = OFF) THEN //High Low Air
-  &OPmsg = 6           
- ENDIF
-&fd100cmd_DRAIN_msg = &OPmsg
+  IF ((|ES01_I1 = OFF) OR (|ES01_I2 = ON)) THEN
+    &OPmsg = 3
+  ELSIF (|PS01_I = OFF) THEN
+    &OPmsg = 4
+  ELSIF (|PS02_I = OFF) THEN
+    &OPmsg = 5
+  ELSIF (|PS03_I = OFF) THEN
+    &OPmsg = 6
+  ELSIF (&fd100Status = fd100Status_RINSE_FULL) THEN
+    &OPmsg = 10
+  ELSIF (&fd100Status = fd100Status_CIP_FULL) THEN
+    &OPmsg = 12
+  ELSIF (&fd100Status = fd100Status_CIP_MT) THEN
+    &OPmsg = 13            
+  ENDIF
 
-&OPmsg = 0
- IF ((|ES01_I1 = OFF) OR (|ES01_I2 = ON)) THEN //ESTOP
-  &OPmsg = 3
- ELSIF (|PS02_I = OFF) THEN //High Pressure Air
-  &OPmsg = 5
- ELSIF (|PS03_I = OFF) THEN //High Low Air
-  &OPmsg = 6           
- ENDIF
-&fd100cmd_STORE_msg = &OPmsg
+  &fd100cmd_prod_msg = &OPmsg
 
 
+  // Check for faults that would inhibit the selection of 'cip'
+  &OPmsg = 0
+
+  IF ((|ES01_I1 = OFF) OR (|ES01_I2 = ON)) THEN
+    &OPmsg = 3
+  ELSIF (|PS01_I = OFF) THEN
+    &OPmsg = 4
+  ELSIF (|PS02_I = OFF) THEN
+    &OPmsg = 5
+  ELSIF (|PS03_I = OFF) THEN
+    &OPmsg = 6
+  ELSIF (&fd100Status = fd100Status_RINSE_FULL) THEN
+    &OPmsg = 10
+  ELSIF (&fd100Status = fd100Status_PROD_FULL) THEN
+    &OPmsg = 8
+  ELSIF (&fd100Status = fd100Status_PROD_MT) THEN
+    &OPmsg = 9            
+  ENDIF
+
+  &fd100cmd_cip_msg = &OPmsg
+
+
+  // Check for faults that would inhibit the selection of 'rinse'
+  &OPmsg = 0
+
+  IF ((|ES01_I1 = OFF) OR (|ES01_I2 = ON)) THEN  //ESTOP
+    &OPmsg = 3
+  ELSIF (|PS01_I = OFF) THEN  //Water Pressure
+    &OPmsg = 4
+  ELSIF (|PS02_I = OFF) THEN  //High Pressure Air
+    &OPmsg = 5
+  ELSIF (|PS03_I = OFF) THEN  //High Low Air
+    &OPmsg = 6
+  ELSIF (&fd100Status = fd100Status_CIP_FULL) THEN
+    &OPmsg = 12
+  ELSIF (&fd100Status = fd100Status_PROD_FULL) THEN
+    &OPmsg = 8           
+  ENDIF
+
+  &fd100cmd_rinse_msg = &OPmsg
+
+
+  // Check for faults that would inhibit the selection of 'drain'
+  &OPmsg = 0
+
+  IF ((|ES01_I1 = OFF) OR (|ES01_I2 = ON)) THEN //ESTOP
+    &OPmsg = 3
+  ELSIF (|PS02_I = OFF) THEN //High Pressure Air
+    &OPmsg = 5
+  ELSIF (|PS03_I = OFF) THEN //High Low Air
+    &OPmsg = 6           
+  ENDIF
+
+  &fd100cmd_DRAIN_msg = &OPmsg
+
+
+  // Check for faults that would inhibit the selection of 'store'
+  &OPmsg = 0
+
+  IF ((|ES01_I1 = OFF) OR (|ES01_I2 = ON)) THEN //ESTOP
+    &OPmsg = 3
+  ELSIF (|PS02_I = OFF) THEN //High Pressure Air
+    &OPmsg = 5
+  ELSIF (|PS03_I = OFF) THEN //High Low Air
+    &OPmsg = 6           
+  ENDIF
+
+  &fd100cmd_STORE_msg = &OPmsg
+
+endif
+
+
+
+// Process the instruction.  For the given instruction, check that there are no
+// faults detected.  If we're all good to go, copy the instruction into the one-shot
+// variable.
 select &fd100cmd 
- //Check If No Precondition Faults
- case  fd100cmd_RECIRC:
-  if ((&fd100cmd_prod_msg = 0) AND (&fd100FillSource = fd100FillSource_SITE)) then
-   &fd100cmdOns = &fd100cmd
-  elsif ((&fd100cmd_prod_msg = 0) AND (&fd100FillSource = fd100FillSource_NONE)) then
-   &fd100cmdOns = &fd100cmd
-  elsif ((&fd100cmd_prod_msg = 0) AND (&fd100FillSource = fd100FillSource_TANK)) then
-   &fd100cmdOns = &fd100cmd 
-  elsif ((&fd100cmd_rinse_msg = 0) AND (&fd100FillSource = fd100FillSource_WATER)) then
-   &fd100cmdOns = &fd100cmd
-  elsif ((&fd100cmd_cip_msg = 0) AND (&fd100FillSource = fd100FillSource_CHEM)) then
-   &fd100cmdOns = &fd100cmd
-  elsif ((&fd100cmd_cip_msg = 0) AND (&fd100FillSource = fd100FillSource_MANCHEM)) then
-   &fd100cmdOns = &fd100cmd 
-  endif
+
+  case  fd100cmd_RECIRC:
+    if ((&fd100cmd_prod_msg = 0) AND (&fd100FillSource = fd100FillSource_SITE)) then
+      &fd100cmdOns = &fd100cmd
+    elsif ((&fd100cmd_prod_msg = 0) AND (&fd100FillSource = fd100FillSource_NONE)) then
+      &fd100cmdOns = &fd100cmd
+    elsif ((&fd100cmd_prod_msg = 0) AND (&fd100FillSource = fd100FillSource_TANK)) then
+      &fd100cmdOns = &fd100cmd 
+    elsif ((&fd100cmd_rinse_msg = 0) AND (&fd100FillSource = fd100FillSource_WATER)) then
+      &fd100cmdOns = &fd100cmd
+    elsif ((&fd100cmd_cip_msg = 0) AND (&fd100FillSource = fd100FillSource_CHEM)) then
+      &fd100cmdOns = &fd100cmd
+    elsif ((&fd100cmd_cip_msg = 0) AND (&fd100FillSource = fd100FillSource_MANCHEM)) then
+      &fd100cmdOns = &fd100cmd 
+    endif
   
+
   case  fd100cmd_DRAIN:
-  if (&fd100cmd_DRAIN_msg = 0) then
-   &fd100cmdOns = &fd100cmd
-  endif
+    if (&fd100cmd_DRAIN_msg = 0) then
+      &fd100cmdOns = &fd100cmd
+    endif
   
+
   case  fd100cmd_STORE:
-  if (&fd100cmd_STORE_msg = 0) then
-   &fd100cmdOns = &fd100cmd
-  endif
+    if (&fd100cmd_STORE_msg = 0) then
+      &fd100cmdOns = &fd100cmd
+    endif
   
- default:
-  &fd100cmdOns = &fd100cmd
+
+  default:
+    &fd100cmdOns = &fd100cmd
+
 endsel
  
 &fd100cmd = fd100cmd_noAction
+
 
 
 // ******************
@@ -181,10 +224,10 @@ select &tempStepNum
    &tempStepNum = fd100StepNum_FILL 
   ENDIF
   IF ((&fd100cmdOns=fd100cmd_DRAIN) AND (|PS01_I = ON)) THEN
-   &tempStepNum = fd100StepNum_MT2DRAIN 
+   &tempStepNum = fd100StepNum_MT2WASTE 
   ENDIF
   IF ((&fd100cmdOns=fd100cmd_DRAIN) AND (|PS01_I = OFF)) THEN
-   &tempStepNum = fd100StepNum_DRAIN 
+   &tempStepNum = fd100StepNum_DRAIN2WASTE 
   ENDIF
   IF ((&fd100cmdOns=fd100cmd_STORE) AND (|PS01_I = ON)) THEN
    &tempStepNum = fd100StepNum_MT2STORE 
@@ -330,15 +373,15 @@ select &tempStepNum
   gosub checkForAbort
   
 
- case fd100StepNum_MT2DRAIN: //Production or CIP Chemical Wash - Pump Feedtank To Drain
+ case fd100StepNum_MT2WASTE: //Production or CIP Chemical Wash - Pump Feedtank To Drain
   //Feed Tank Reached Empty Level. 
   IF (&LT01_100 < &LT01SP06) THEN
-   &tempStepNum = fd100StepNum_DRAIN
+   &tempStepNum = fd100StepNum_DRAIN2WASTE
   ENDIF
   gosub checkForAbort
   
 
- case fd100StepNum_DRAIN: //Production or CIP Chemical Wash - Drain Plant
+ case fd100StepNum_DRAIN2WASTE: //Production or CIP Chemical Wash - Drain Plant
   //Drain Plant Time
   IF ((&fd100StepTimeAcc_m >= &fd100StepTimePre_DRAIN_m)\
    AND (&fd100StepTimeAcc_s10 >= &fd100StepTimePre_DRAIN_s10)) THEN
@@ -421,6 +464,7 @@ IF (&tempStepNum != &fd100StepNum) THEN
    
    &PC05cv=&PC05cv01 //Open CV01 to enable recirc
    &fd100_LT01max = 0 
+
    
 
   case fd100StepNum_MIX: //Production or CIP Chemical Wash - Mix Via Bypass Line
@@ -429,8 +473,8 @@ IF (&tempStepNum != &fd100StepNum) THEN
    force_log
    &EventID = EventID_NONE
 
-   &DPC01cv=&DPC01cv01 //Set PC01sp to control the speed of the Main Feed Pump
-   &PC01cv=&PC01cv01 //Set Initial the speed of the Main Feed Pump
+   &DPC01cv=&DPC01cv01 // Set PC01sp to control the speed of the Main Feed Pump
+   &PC01cv=&PC01cv01   // Set Initial the speed of the Main Feed Pump
    if (&fd100FillSource = fd100FillSource_NONE) then
     &fd100Status = fd100Status_PROD_FULL //Set Plant Status
    endif
@@ -451,6 +495,7 @@ IF (&tempStepNum != &fd100StepNum) THEN
    endif   
 
 
+
   case fd100StepNum_RECIRC: //Production or CIP Chemical Wash - Recirc through filter
    // Log the fact that recirc's started
    &EventID = EventID_RECIRC_STARTED
@@ -458,10 +503,10 @@ IF (&tempStepNum != &fd100StepNum) THEN
    &EventID = EventID_NONE
 
    // Set up the PID controllers for Recirc 
-   &DPC01sp=&DPC01sp01
-   &PC05sp=&PC05sp01
-   &PC03sp=&PC03sp01 // Backwash target pressure 
-   &PC03cv=&PC03cv01 // Backwash's starting position
+   &DPC01spRampTarget = &DPC01sp01
+   &PC05spRampTarget  = &PC05sp01
+   &PC03spRampTarget  = &PC03sp01 // Backwash target pressure 
+   &PC03cv            = &PC03cv01 // Backwash's starting position
     
 
   case fd100StepNum_CONC: //Production - Concentrate
@@ -470,8 +515,8 @@ IF (&tempStepNum != &fd100StepNum) THEN
    force_log
    &EventID = EventID_NONE
 
-   &RC01cv=&RC01cv01 //Concentration Ratio Starting Value
-   &RC01sp=&RC01sp01 //Concentration Ratio
+   &RC01cv           = &RC01cv01 //Concentration Ratio Starting Value
+   &RC01spRampTarget = &RC01sp01 //Concentration Ratio
    
 
   case fd100StepNum_MT2SITE: //Production - Empty Feedtank To Site
@@ -481,18 +526,18 @@ IF (&tempStepNum != &fd100StepNum) THEN
    &EventID = EventID_NONE
   
 
-  case fd100StepNum_MT2DRAIN: //Production or CIP Chemical Wash - Pump Feedtank To Drain 
+  case fd100StepNum_MT2WASTE: //Production or CIP Chemical Wash - Pump Feedtank To Drain 
    // Log the fact that we've started pumping to drain
-   &EventID = EventID_MT2DRAIN_STARTED
+   &EventID = EventID_MT2WASTE_STARTED
    force_log
    &EventID = EventID_NONE
 
    &PC01cv=&PC01cv02
    
 
-  case fd100StepNum_DRAIN: //Production or CIP Chemical Wash - Empty Feedtank To Drain
+  case fd100StepNum_DRAIN2WASTE: //Production or CIP Chemical Wash - Empty Feedtank To Drain
    // Log the fact that we've started passive draining
-   &EventID = EventID_DRAIN_STARTED
+   &EventID = EventID_DRAIN2WASTE_STARTED
    force_log
    &EventID = EventID_NONE
 
@@ -617,17 +662,17 @@ select &tempStepNum
    endif 
   endif 
   |fd100_fd100Fault_enable1 = ON
-  |fd100_DV06en1 = ON //Energise If Fill Source is WATER  
-  |fd100_IL01 = ON //PB01 LED Light
-  |fd100_IV08en1 = ON //Energise If Fill Source is SITE and Level Low 
-  |fd100_IV10en1 = ON //Energise If Fill Source is WATER and Level Low 
-  |fd100_IV15 = ON //Seal Water
-  |fd100_PP01 = ON //Run Pump
-  |fd100_DPC01so = ON //Set SP of HOF Filter Inlet Pressure Control Loop
-  |fd100_PC01pidEn1 = ON //HOF Filter Inlet Pressure Control Loop
-  |fd100_PC05so = ON //Open CV01 to enable recirc
-  |fd100Temperatureen1 = ON //Cool or Heat As Selected
-  |fd100_fd102_chemdoseEn1 = ON //Dose Chemical If CIP
+  |fd100_DV06en1 = ON        // Energise if Fill Source is WATER  
+  |fd100_IL01 = ON           // PB01 LED Light
+  |fd100_IV08en1 = ON        // Energise if Fill Source is SITE and Level Low 
+  |fd100_IV10en1 = ON        // Energise if Fill Source is WATER and Level Low 
+  |fd100_IV15 = ON           // Seal Water
+  |fd100_PP01 = ON           // Run Pump
+  |fd100_DPC01so = ON        // Set SP of HOF Filter Inlet Pressure Control Loop
+  |fd100_PC01pidEn1 = ON     // HOF Filter Inlet Pressure Control Loop
+  |fd100_PC05so = ON         // Open CV01 to enable recirc
+  |fd100Temperatureen1 = ON  // Cool or Heat As Selected
+  |fd100_fd102_chemdoseEn1 = ON // Dose Chemical if CIP
 
 
  case fd100StepNum_RECIRC: //Production or CIP Chemical Wash - Recirc through filter
@@ -716,7 +761,7 @@ select &tempStepNum
   |fd100_fd101_recirc = ON //Start Route Sequence 
    
 
- case fd100StepNum_MT2DRAIN: //Production or CIP Chemical Wash - Pump Feedtank To Drain
+ case fd100StepNum_MT2WASTE: //Production or CIP Chemical Wash - Pump Feedtank To Drain
   |fd100_fd100Fault_enable1 = ON  
   |fd100_IL01 = ON //PB01 LED Light 
   |fd100_IV15 = ON //Seal Water
@@ -728,7 +773,7 @@ select &tempStepNum
   &R01 = 1.0  
   
 
- case fd100StepNum_DRAIN: //Production or CIP Chemical Wash - Empty Feedtank To Drain
+ case fd100StepNum_DRAIN2WASTE: //Production or CIP Chemical Wash - Empty Feedtank To Drain
   IF (&LT01_100 < &LT01SP06) THEN
    &fd100StepTimeAcc_s10 = &fd100StepTimeAcc_s10 + &lastScanTimeShort
   ELSE
@@ -828,134 +873,208 @@ endif
 // Fault Monitor Logic
 // *******************
 
-//Fault Checks
+// Clear the fault message if the push button has been pressed to restart
+// the plant, or if the fault message should be off.
 &OPmsg = &fd100Faultcmd_resetMsg
-if (((|fd100Fault_PB01toRestart = ON)\
- and (&PB01State=PB01Pressed))\
- or (|fd100Fault_msg1 = OFF)) then
- &OPmsg = 0
+if (|fd100Fault_PB01toRestart = ON and &PB01State=PB01Pressed)\
+or |fd100Fault_msg1 = OFF then
+  &OPmsg = 0
 endif
 
+
+// Check for possible fault conditions
 if (|fd100Fault_msg1 = ON) then
- IF (|PP01motFault = ON) THEN
-  &OPmsg = 1
- ELSIF ((|fd100Fault_PB01toPause = ON) AND (&PB01State=PB01Pressed)) THEN
-  &OPmsg = 2
- ELSIF ((|ES01_I1 = OFF) OR (|ES01_I2 = ON)) THEN
-  &OPmsg = 3
- ELSIF (|PS01_I = OFF) THEN
-  &OPmsg = 4
- ELSIF (|PS02_I = OFF) THEN
-  &OPmsg = 5
- ELSIF (|PS03_I = OFF) THEN
-  &OPmsg = 6
- ELSIF ((|FS01_I = OFF) AND (|PP01out = ON)) THEN
-  &OPmsg = 7
- ELSIF ((|fd100Fault_PB01toPause = ON) AND (&fd100cmdOns=fd100cmd_PAUSE)) THEN
-  &OPmsg = 14
- ELSIF ((|fd100_fd100Fault_FILL = ON)\
+  IF (|PP01motFault = ON) THEN
+    // Fault on the main pump
+    &OPmsg = 1
+  ELSIF ((|fd100Fault_PB01toPause = ON) AND (&PB01State=PB01Pressed)) THEN
+    // The push button has been pressed to pause the plant
+    &OPmsg = 2
+  ELSIF ((|ES01_I1 = OFF) OR (|ES01_I2 = ON)) THEN
+    // The emergency stop has been pressed
+    &OPmsg = 3
+  ELSIF (|PS01_I = OFF) THEN
+    // Insufficient water pressure
+    &OPmsg = 4
+  ELSIF (|PS02_I = OFF) THEN
+    // Insufficient high-pressure compressed air
+    &OPmsg = 5
+  ELSIF (|PS03_I = OFF) THEN
+    // Insufficient low-pressure compressed air
+    &OPmsg = 6
+  ELSIF ((|FS01_I = OFF) AND (|PP01out = ON)) THEN
+    // No seal water on the main pump and the main pump is running
+    &OPmsg = 7
+  ELSIF ((|fd100Fault_PB01toPause = ON) AND (&fd100cmdOns=fd100cmd_PAUSE)) THEN
+    // Pause instruction received
+    &OPmsg = 14
+  ELSIF ((|fd100_fd100Fault_FILL = ON)\
   AND (&fd100StepTimeAcc_m >= &fd100StepTimePre_FILL_m)\
   AND (&fd100StepTimeAcc_s10 > &fd100StepTimePre_FILL_s10)\
   AND (&LT01_100 < (&LT01SP03 + &LT01SP04))) THEN
-  &OPmsg = 15
- ELSIF (&TT01_100 < &TT01SP03) THEN
-  &OPmsg = 16
- ELSIF (&TT01_100 > &TT01SP04) THEN
-  &OPmsg = 17
- ELSIF (&PT01_1000 > &PT01SP01) THEN
-  &OPmsg = 18
- ELSIF (&PT05_1000 > &PT05SP01) THEN
-  &OPmsg = 19
- ELSIF (&PT03_1000 > &PT03SP01) THEN
-  &OPmsg = 20
- ELSIF (&DPT01_1000 > &DPT01SP01) THEN
-  &OPmsg = 21
- ELSIF (&PH01_100 < &PH01SP01) THEN
-  &OPmsg = 22
- ELSIF (&PH01_100 > &PH01SP02) THEN
-  &OPmsg = 23                  
- ENDIF
+    // While attempting to fill the tank, the level is still too low and
+    // we've exhausted the allowed time.
+    &OPmsg = 15
+  ELSIF (&TT01_100 < &TT01SP03) THEN
+    // The feed tank's temperature is too low
+    &OPmsg = 16
+  ELSIF (&TT01_100 > &TT01SP04) THEN
+    // The feed tank's temperature is too high 
+    &OPmsg = 17
+  ELSIF (&PT01_1000 > &PT01SP01) THEN
+    // The inlet pressure to the membrane is too high
+    &OPmsg = 18
+  ELSIF (&PT05_1000 > &PT05SP01) THEN
+    // The transmembrane pressure is too high
+    &OPmsg = 19
+  ELSIF (&PT03_1000 > &PT03SP01) THEN
+    // The backwash pressure is too high
+    &OPmsg = 20
+  ELSIF (&DPT01_1000 > &DPT01SP01) THEN
+    // Along membrane pressure too high
+    &OPmsg = 21
+  ELSIF (&PH01_100 < &PH01SP01) THEN
+    // pH is too low
+    &OPmsg = 22
+  ELSIF (&PH01_100 > &PH01SP02) THEN
+    // pH is too high
+    &OPmsg = 23                  
+  ENDIF
  
 endif
-&fd100Faultcmd_resetMsg = &OPmsg
 
-//Selection From RPi
+
+
+// Check if the fault has changed since last time, logging if changed,
+// and set the new fault message (the reason why a fault occurred).
+if &fd100Faultcmd_resetMsg != &OPmsg then
+  gosub logFaultEvent   
+  &fd100Faultcmd_resetMsg = &OPmsg
+else
+  &fd100Faultcmd_resetMsg = &OPmsg
+endif
+
+
+
+// Selection From RPi
 &fd100FaultcmdOns = &fd100Faultcmd 
-&fd100Faultcmd = fd100Faultcmd_noAction
+&fd100Faultcmd = fd100Faultcmd_NO_ACTION
 
-//Clear Sequence Outputs... these are then set on below
+
+// Process instruction
+&tempStepNum = &fd100FaultStepNum
+select &fd100FaultcmdOns
+
+  case fd100Faultcmd_ENABLE_FAULTS:
+    // Enable fault checking
+    if &fd100FaultStepNum = fd100Fault_disabled then
+      &tempStepNum = fd100Fault_reset
+    endif  
+     
+    
+  case fd100Faultcmd_DISABLE_FAULTS:
+    // Disable fault checking 
+    &tempStepNum = fd100Fault_disabled 
+    
+
+  default:
+    // Do nothing
+
+endsel
+
+// Clear Sequence Outputs... these are then set on below
 &fd100FaultProgOut01 = 0
 
-//Step Transistions
-&tempStepNum = &fd100FaultStepNum
+// Step Transistions
 select &tempStepNum 
 
- case fd100Fault_reset:
-  IF (|fd100_fd100Fault_enable1 = ON) THEN
-   &tempStepNum = fd100Fault_monitor1 
-  ENDIF  
+  case fd100Fault_reset:
+    IF (|fd100_fd100Fault_enable1 = ON) THEN
+      &tempStepNum = fd100Fault_monitor1 
+    ENDIF  
 
- case fd100Fault_monitor1:
-  IF (|fd100_fd100Fault_enable1 = OFF) THEN
-   &tempStepNum = fd100Fault_reset 
-  ENDIF
-  IF (&fd100Faultcmd_resetMsg > 0) THEN
-   &tempStepNum = fd100Fault_action1 
-  ENDIF  
 
- case fd100Fault_action1:
-  IF (|fd100_fd100Fault_enable1 = OFF) THEN
-   &tempStepNum = fd100Fault_reset 
-  ENDIF
-  IF ((&fd100Faultcmd_resetMsg = 0) AND (&PB01State=PB01Pressed)) THEN
-   &tempStepNum = fd100Fault_monitor1 
-  ENDIF 
+  case fd100Fault_monitor1:
+    IF (|fd100_fd100Fault_enable1 = OFF) THEN
+      &tempStepNum = fd100Fault_reset 
+    ENDIF
+    IF (&fd100Faultcmd_resetMsg > 0) THEN
+      &tempStepNum = fd100Fault_action1 
+    ENDIF  
+
+
+  case fd100Fault_action1:
+    IF (|fd100_fd100Fault_enable1 = OFF) THEN
+      &tempStepNum = fd100Fault_reset 
+    ENDIF
+    IF ((&fd100Faultcmd_resetMsg = 0) AND (&PB01State=PB01Pressed)) THEN
+      &tempStepNum = fd100Fault_monitor1 
+    ENDIF 
+
+
+  case fd100Fault_disabled:
+    // Do nothing 
+
 
  default:
-  &tempStepNum = fd100Fault_reset
+   &tempStepNum = fd100Fault_reset
 
 endsel
 
 //Step Ons Actions
 IF (&tempStepNum != &fd100FaultStepNum) THEN
- &fd100FaultStepNum = &tempStepNum 
- select &tempStepNum
+  &fd100FaultStepNum = &tempStepNum 
 
-  case fd100Fault_reset:
+  select &tempStepNum
 
-  case fd100Fault_monitor1:
+    case fd100Fault_reset:
 
-  case fd100Fault_action1:         
-   // Log the fault
-   gosub logFaultEvent   
 
-  default:
+    case fd100Fault_monitor1:
 
- endsel
+
+    case fd100Fault_action1:         
+      // Do nothing (fault logging occurs above)
+      
+    case fd100Fault_disabled:
+      // Do nothing
+
+    default:
+      // Do nothing
+
+  endsel
 ENDIF
 
 //Step Actions
 select &tempStepNum
- case fd100Fault_reset:
- 
- case fd100Fault_monitor1:
-  |fd100Fault_msg1 = ON
-  |fd100Fault_PB01toPause = ON
 
- case fd100Fault_action1:
-  |fd100Fault_IL01fault = ON //PB01 LED Light To flash to incidate fault 
-  |fd100Fault_msg1 = ON
-  |fd100Fault_PB01toRestart = ON  
-  |fd100Fault_PP01pause = ON
-  |fd100Fault_PP03pause = ON
-  |fd100Fault_DPC01pidHold = ON
-  |fd100Fault_PC01pidHold = ON
-  |fd100Fault_PC05pidHold = ON
-  |fd100Fault_RC01pidHold = ON
-  |fd100Fault_temperatureHold = ON
-  |fd100Fault_fd100_Pause = ON
-  |fd100Fault_fd101_Pause = ON
-  |fd100Fault_fd102_Pause = ON
+  case fd100Fault_reset:
+ 
+
+  case fd100Fault_monitor1:
+    |fd100Fault_msg1 = ON
+    |fd100Fault_PB01toPause = ON
+
+
+  case fd100Fault_action1:
+    |fd100Fault_IL01fault = ON //PB01 LED Light To flash to incidate fault 
+    |fd100Fault_msg1 = ON
+    |fd100Fault_PB01toRestart = ON  
+    |fd100Fault_PP01pause = ON
+    |fd100Fault_PP03pause = ON
+    |fd100Fault_DPC01pidHold = ON
+    |fd100Fault_PC01pidHold = ON
+    |fd100Fault_PC05pidHold = ON
+    |fd100Fault_RC01pidHold = ON
+    |fd100Fault_temperatureHold = ON
+    |fd100Fault_fd100_Pause = ON
+    |fd100Fault_fd101_Pause = ON
+    |fd100Fault_fd102_Pause = ON
+
+
+  case fd100Fault_disabled:
+    // Do nothing 
+
            
  default:
  

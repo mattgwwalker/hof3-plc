@@ -11,7 +11,7 @@ ELSE
 ENDIF
 
 //Setpoint Set By Master Loop DPC01 and Max Inlet Pressure SP10
-&PC01sp = &PC01sp10 * (&DPC01cv / 10000.0)
+&PC01spRampTarget = &PC01sp10 * (&DPC01cv / 10000.0)
 
 if (|fd100_PC01pidEn1=ON) then
  if ((|fd100Fault_PC01pidHold=OFF) and (|fd101_PC01pidHold=OFF)) then 

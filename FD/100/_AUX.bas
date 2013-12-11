@@ -11,14 +11,14 @@ CONST fd100StepNum_MIX = 5
 CONST fd100StepNum_RECIRC = 6
 CONST fd100StepNum_CONC = 7
 CONST fd100StepNum_MT2SITE = 8
-CONST fd100StepNum_MT2DRAIN = 9
-CONST fd100StepNum_DRAIN = 10
+CONST fd100StepNum_MT2WASTE = 9
+CONST fd100StepNum_DRAIN2WASTE = 10
 CONST fd100StepNum_MT2STORE = 11
 CONST fd100StepNum_DRAIN2STORE = 12
 
 DIM fd100MsgArray[] = \
 ["     Reset     ",\
-"Awaiting command",\
+"      Ready     ",\
 "               Press the green button to start               ",\
 "    Waiting     ",\
 "Filling Feedtank",\
@@ -26,10 +26,10 @@ DIM fd100MsgArray[] = \
 "  Recirculating ",\
 "  Concentrating ",\
 "Emptying to site",\
-"Pumping to drain",\
-"    Draining    ",\
+"Pumping to waste",\
+"Draining to waste",\
 "Pumping to store",\
-"Drain to store"]
+"Draining to store"]
 
 REG &fd100StepTimeAcc = &AUX2
 MEM &fd100StepTimeAcc = 0
