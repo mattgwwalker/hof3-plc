@@ -6,45 +6,81 @@
 //&PIDspRampRate = &XXspRampRate
 //&PIDspRampMaxErr = &XXspRampMaxErr
 
+
+
+
+// Do not write directly to the setpoint, instead write to the ramp-target and 
+// the set point will be decided automatically.
+
+
+CONST PIDtacc_UPDATE_FREQ = 100 // update PID controller every one second
+
+
 PID:
+  // **********
+  // Interlocks
+  // **********
+
+  // These are ON if the action is allowed.  You can think of them as whether
+  // a button, such as "Go to Manual mode" should be greyed-out (interlock OFF)
+  // or active (interlock ON).
+
   IF ((|PIDmodeManEnable = ON) AND (|PIDmodeMan = ON)) THEN
+    // Manual mode is allowed and we're in manual mode, so allow us to go 
+    // back to auto
     |PIDautoInterlock = ON
   ELSE
+    // Otherwise, don't allow us to change to auto
     |PIDautoInterlock = OFF 
   ENDIF
     
   IF ((|PIDmodeManEnable = ON) AND (|PIDmodeMan = OFF)) THEN
+    // Manual mode's allowed but we're in auto, so allow manual mode
     |PIDmanInterlock = ON
   ELSE
+    // Otherwise, don't allow us to change to manual
     |PIDmanInterlock = OFF 
   ENDIF
 
   IF ((|PIDmodeMan = ON) AND (|PIDmodePID = ON)) THEN
+    // We're in manual and in PID-mode, so allow us to go to set-output mode
     |PIDsetOutputInterlock = ON
   ELSE
     |PIDsetOutputInterlock = OFF 
+    // Otherwise, don't allow us to change to set-output mode
   ENDIF
     
   IF ((|PIDmodeMan = ON) AND (|PIDmodePID = OFF)) THEN
+    // We're in manual but PID-mode's off, so allow us to go to PID-mode 
     |PIDpidInterlock = ON
   ELSE
+    // Otherwise, don't allow us to change to PID-mode
     |PIDpidInterlock = OFF 
   ENDIF
     
-  IF ((|PIDmodeMan = ON) AND (|PIDmodePID = ON) AND (|PIDmodeSpRamp = ON)) THEN
+  // (|PIDmodeMan = ON) AND <-- I can't see a reason for this
+  IF ((|PIDmodePID = ON) AND (|PIDmodeSpRamp = ON)) THEN
+    // We're in PID-mode and ramping is on, so allow us to turn off ramping
     |PIDspRampOFFInterlock = ON
   ELSE
     |PIDspRampOFFInterlock = OFF 
+    // Otherwise, don't allow us to turn off ramping
   ENDIF
     
-  IF ((|PIDmodeMan = ON) AND (|PIDmodePID = ON) AND (|PIDmodeSpRamp = OFF)) THEN
+  // (|PIDmodeMan = ON) AND <-- I can't see a reason for this
+  IF ((|PIDmodePID = ON) AND (|PIDmodeSpRamp = OFF)) THEN
+    // We're in PID-mode but ramping is off, so allow us to turn on ramping
     |PIDspRampONInterlock = ON
   ELSE
     |PIDspRampONInterlock = OFF 
+    // Otherwise, don't allow us to turn on ramping
   ENDIF
 
    
-  //cmd 0=none 1=auto 2=manualSO 3=manualPID
+  // ********
+  // Commands
+  // ********
+  
   SELECT &PIDcmd
     CASE 0:
       //No action
@@ -106,9 +142,13 @@ PID:
     DEFAULT:
   ENDSEL
   
+  
   IF (|PIDmodeMan = OFF) THEN
+    // We're in auto mode, so set the desired PID mode based on what the 
+    // program is calling for
     |PIDmodePID = |PIDprogOutModePID
   ELSIF (|PIDmodeManEnable = OFF) THEN
+    // Force manual mode to off if manual mode isn't allowed
     |PIDmodeMan = OFF
   ENDIF  
   
@@ -125,13 +165,21 @@ PID:
              
     CASE 1: //PID mode
       &PIDtacc =  &PIDtacc + &lastScanTimeFast
-      IF (((|PIDcalcMode=ON) AND (|PIDcalc=ON)) OR ((|PIDcalcMode=OFF) AND (&PIDtacc >= 100))) THEN
+      IF (((|PIDcalcMode=ON) AND (|PIDcalc=ON)) OR ((|PIDcalcMode=OFF) AND (&PIDtacc >= PIDtacc_UPDATE_FREQ))) THEN
+        // We're in calc mode and we're asking to do the calculation, 
+        // or we're not in calc mode and sufficient time has passed since the
+        // last update
         &PIDtacc = 0
         IF (|PIDmodeSpRamp = ON) THEN
-          //IF (|PIDmodeSpRampLast = OFF) THEN                                    //To do
-          // |PIDmodeSpRampLast = ON
-          // &PIDsp = &PIDpv 
-          //ENDIF
+          IF (|PIDmodeSpRampLast = OFF) THEN
+            // We just beinging setpoint ramping, so we'll start off at the
+            // current value.
+            |PIDmodeSpRampLast = ON
+            &PIDsp = &PIDpv 
+          ENDIF
+
+          // Set the setpoint based on the ramp target, the ramp rate, and the
+          // maximum error.
           IF ((&PIDspRampTarget - &PIDsp) >= &PIDspRampRate) THEN
             IF ((&PIDsp - &PIDpv) < &PIDspRampMaxErr) THEN
               &PIDsp = &PIDsp + &PIDspRampRate
@@ -150,9 +198,10 @@ PID:
             ENDIF
           ENDIF
         ELSE
-          &PIDspRampTarget = &PIDsp
-          // &PIDsp = &PIDspRampTarget
-          // |PIDmodeSpRampLast = OFF
+          // Setpoint ramping is off, so copy the ramp target directly into the
+          // setpoint
+          &PIDsp = &PIDspRampTarget
+          |PIDmodeSpRampLast = OFF
         ENDIF
         IF (|PIDmodeRev = ON) THEN   
           &PIDerr = &PIDpv - &PIDsp
@@ -199,6 +248,8 @@ PID:
     &PIDstate = &PIDstateNew  
   ENDIF
 
+  // Ensure the control variable (the output of the PID controller) is 
+  // between 0.00% and 100.00%
   IF (&PIDcv > 10000) THEN
     &PIDcv = 10000
   ELSIF (&PIDcv < 0) THEN
