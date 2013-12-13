@@ -27,6 +27,7 @@ endif
 |PC01modeRev = OFF
 |PC01calc = OFF
 |PC01calcMode = OFF
+|PC01modeSpRamp = ON
 
 //INPUTS
 &PIDstatus = &PC01status
@@ -62,6 +63,7 @@ ENDIF
 &PC01errLastLast = &PIDerrLastLast
 &PC01tacc = &PIDtacc
 
+// If we're being asked to switch off, then go to zero immediately
 IF ((|fd100_PC01pid=OFF) AND (|fd100_PC01so=OFF) AND (|PC01modeMan=OFF)) THEN
   |PC01modeSpRamp = OFF
   &PC01cv = 0

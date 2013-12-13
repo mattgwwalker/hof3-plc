@@ -1,5 +1,5 @@
 //FD101 USER_MEMORY registers
-//** &USER_MEMORY_930 to &USER_MEMORY_959 currently allocated ** 
+//** &USER_MEMORY_930 to &USER_MEMORY_969 currently allocated ** 
 REG &fd101ProgOut01 = &USER_MEMORY_930
 MEM &fd101ProgOut01 = 0
 BITREG &fd101ProgOut01 = [\
@@ -34,10 +34,20 @@ MEM &fd101StepTimePre_RECIRC_TO_BOTTOM_s10 = 40 // four seconds
 REG &fd101StepTimePre_RECIRC_TO_BOTTOM_m = &USER_MEMORY_935
 MEM &fd101StepTimePre_RECIRC_TO_BOTTOM_m = 0
 
+REG &fd101StepTimePre_RECIRC_BOTTOM_SPEED_RAMP_s10 = &USER_MEMORY_957
+MEM &fd101StepTimePre_RECIRC_BOTTOM_SPEED_RAMP_s10 = 40 // four seconds 
+REG &fd101StepTimePre_RECIRC_BOTTOM_SPEED_RAMP_m = &USER_MEMORY_958
+MEM &fd101StepTimePre_RECIRC_BOTTOM_SPEED_RAMP_m = 0
+
 REG &fd101StepTimePre_RECIRC_TO_TOP_s10 = &USER_MEMORY_936
 MEM &fd101StepTimePre_RECIRC_TO_TOP_s10 = 40 // four seconds
 REG &fd101StepTimePre_RECIRC_TO_TOP_m = &USER_MEMORY_937
 MEM &fd101StepTimePre_RECIRC_TO_TOP_m = 0
+
+REG &fd101StepTimePre_RECIRC_TOP_SPEED_RAMP_s10 = &USER_MEMORY_959
+MEM &fd101StepTimePre_RECIRC_TOP_SPEED_RAMP_s10 = 40 // four seconds
+REG &fd101StepTimePre_RECIRC_TOP_SPEED_RAMP_m = &USER_MEMORY_960
+MEM &fd101StepTimePre_RECIRC_TOP_SPEED_RAMP_m = 0
 
 REG &fd101StepTimePre_RECIRC_BW_TOP_s10 = &USER_MEMORY_938
 MEM &fd101StepTimePre_RECIRC_BW_TOP_s10 = 50
@@ -88,3 +98,14 @@ MEM &fd101_BW_count = 0
 
 REG &fd101_BW_LoggingEnabled = &USER_MEMORY_956
 MEM &fd101_BW_LoggingEnabled = 0
+
+// User memory 957 to 960 used above
+
+REG &fd101_Dir_PumpSpeedProportion = &USER_MEMORY_961
+MEM &fd101_Dir_PumpSpeedProportion = 7000 // 70.00%
+
+REG &fd101_BW_PumpSpeedProportion = &USER_MEMORY_962
+MEM &fd101_BW_PumpSpeedProportion = 7000 // 70.00%
+
+REG &fd101_PreviousPumpSpeed = &USER_MEMORY_963
+MEM &fd101_PreviousPumpSpeed = 0

@@ -22,9 +22,9 @@ MEM &PC05errLast = 0
 REG &PC05errLastLast = &USER_MEMORY_758
 MEM &PC05errLastLast = 0
 REG &PC05p = &USER_MEMORY_759
-MEM &PC05p = 280
+MEM &PC05p = 80
 REG &PC05i = &USER_MEMORY_760
-MEM &PC05i = 50
+MEM &PC05i = 30
 REG &PC05d = &USER_MEMORY_761
 MEM &PC05d = 0
 REG &PC05tacc = &USER_MEMORY_762
@@ -60,7 +60,7 @@ MEM &PC05sp09 = 0
 REG &PC05sp10 = &USER_MEMORY_779
 MEM &PC05sp10 = 0
 REG &PC05cv01 = &USER_MEMORY_780 //Production - Initial Valve Position
-MEM &PC05cv01 = 10000
+MEM &PC05cv01 = 0 // fully open
 REG &PC05cv02 = &USER_MEMORY_781
 MEM &PC05cv02 = 0
 REG &PC05cv03 = &USER_MEMORY_782
@@ -75,8 +75,12 @@ REG &PC05cv07 = &USER_MEMORY_786
 MEM &PC05cv07 = 0
 REG &PC05cv08 = &USER_MEMORY_787
 MEM &PC05cv08 = 0
-REG &PC05cv09 = &USER_MEMORY_788
-MEM &PC05cv09 = 0
-REG &PC05cv10 = &USER_MEMORY_789
-MEM &PC05cv10 = 0
+REG &PC05freezeValue = &USER_MEMORY_788 // For freezing, the current value is copied here
+MEM &PC05freezeValue = 0
+REG &PC05freezeState = &USER_MEMORY_789 // Freeze state: set to either FROZEN or NORMAL 
+CONST PC05freezeState_NORMAL = 0
+CONST PC05freezeState_FROZEN = 1
+MEM &PC05freezeState = PC05freezeState_NORMAL
+
+
 

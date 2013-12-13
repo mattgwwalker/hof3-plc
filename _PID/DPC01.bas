@@ -33,6 +33,7 @@ endif
 |DPC01modeRev = OFF
 |DPC01calc = OFF
 |DPC01calcMode = OFF
+|DPC01modeSpRamp = ON
 
 //INPUTS
 &PIDstatus = &DPC01status

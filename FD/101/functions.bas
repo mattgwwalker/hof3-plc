@@ -52,3 +52,20 @@ logFreezePIDsEvent:
   endif
   return
 
+
+// Reduce pump speed for direction changes
+reducePumpSpeedForDirChange:
+  // Copy current pump speed
+  &fd101_PreviousPumpSpeed = &PC01cv
+  // Decrease pump speed (proportion is between 0 and 10,000)
+  &PC01cv = (1.0 * &PC01cv) * (&fd101_Dir_PumpSpeedProportion / 10000.0) 
+  return
+  
+
+// Reduce pump speed for backwash
+reducePumpSpeedForBackwash:
+  // Copy current pump speed
+  &fd101_PreviousPumpSpeed = &PC01cv
+  // Decrease pump speed (proportion is between 0 and 10,000)
+  &PC01cv = (1.0 * &PC01cv) * (&fd101_BW_PumpSpeedProportion / 10000.0) 
+  return

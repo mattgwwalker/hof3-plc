@@ -59,22 +59,16 @@ PID:
   ENDIF
     
   // (|PIDmodeMan = ON) AND <-- I can't see a reason for this
-  IF ((|PIDmodePID = ON) AND (|PIDmodeSpRamp = ON)) THEN
-    // We're in PID-mode and ramping is on, so allow us to turn off ramping
+  IF |PIDmodeSpRamp = ON THEN
+    // Ramping is on, so allow us to turn off ramping
     |PIDspRampOFFInterlock = ON
+    |PIDspRampONInterlock = OFF
   ELSE
+    // Otherwise, allow us to turn on ramping
     |PIDspRampOFFInterlock = OFF 
-    // Otherwise, don't allow us to turn off ramping
+    |PIDspRampONInterlock = ON 
   ENDIF
     
-  // (|PIDmodeMan = ON) AND <-- I can't see a reason for this
-  IF ((|PIDmodePID = ON) AND (|PIDmodeSpRamp = OFF)) THEN
-    // We're in PID-mode but ramping is off, so allow us to turn on ramping
-    |PIDspRampONInterlock = ON
-  ELSE
-    |PIDspRampONInterlock = OFF 
-    // Otherwise, don't allow us to turn on ramping
-  ENDIF
 
    
   // ********
@@ -222,10 +216,9 @@ PID:
         &PIDstateNew = 2
       ENDIF    
       
-    CASE 2: //SO mode
+    CASE 2: // Set-output mode
       &PIDtacc = 0
       |PIDmodeSpRampLast = OFF
-      |PIDmodeSpRamp = OFF   
       IF (|PIDmodeRev = ON) THEN   
         &PIDerr = &PIDsp - &PIDpv
       ELSE
@@ -233,6 +226,7 @@ PID:
       ENDIF
       &PIDerrLast = &PIDerr
       &PIDerrLastLast = &PIDerrLast
+
       //Transistion Conditions    
       IF (|PIDmodePID = ON) THEN
         &PIDstateNew = 1

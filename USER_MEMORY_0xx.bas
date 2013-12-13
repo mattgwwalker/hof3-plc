@@ -10,6 +10,10 @@ REG &DPT01fault1Sp = &USER_MEMORY_5 //Value
 REG &DPT01fault1Time = &USER_MEMORY_6 //Time (s x 100)
 
 
+// Debug register
+REG &Debug = &USER_MEMORY_96
+
+
 // Register for logging of events
 REG &EventID = &USER_MEMORY_97
 CONST EventID_ON_TIMER = -1

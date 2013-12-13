@@ -74,7 +74,7 @@ INCLUDE "{ROOT}\AI\FT03_USER_MEMORY.bas" //846 - 847
 INCLUDE "{ROOT}\AI\FT02_USER_MEMORY.bas" //848 - 849
 
 INCLUDE "{ROOT}\fd\100\_USER_MEMORY.bas"  //890-929
-INCLUDE "{ROOT}\fd\101\_USER_MEMORY.bas"  //930-959
+INCLUDE "{ROOT}\fd\101\_USER_MEMORY.bas"  //930-969
 INCLUDE "{ROOT}\fd\102\_USER_MEMORY.bas"  //990-999
 
 INCLUDE "{ROOT}\logSetup.bas" //Log
@@ -84,6 +84,7 @@ INCLUDE "{ROOT}\AnalogOutput_.bas"
 INCLUDE "{ROOT}\reset_macro.bas"
 //functions
 INCLUDE "{ROOT}\_PID\function.bas"
+INCLUDE "{ROOT}\_PID\PC05_functions.bas"
 INCLUDE "{ROOT}\_VV\function.bas"
 INCLUDE "{ROOT}\FD\100\functions.bas"
 INCLUDE "{ROOT}\FD\101\functions.bas"
