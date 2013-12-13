@@ -21,23 +21,29 @@
 &fd100ProgOut02 = 0
 
 
+// *****
+// Timer
+// *****
 
-// If the logging timer is enabled (i.e. has a positive value) then 
-// increment it and check if we're ready to log  
-if &fd100LogTimePre_s10 >= 0 then
-  // Timer is enabled, increment it
-  &fd100LogTimeAcc_s10 = &fd100LogTimeAcc_s10 + &lastScanTimeShort
-  // Check if it's time to log
-  if &fd100LogTimeAcc_m >= &fd100LogTimePre_m\
-  and &fd100LogTimeAcc_s10 >= &fd100LogTimePre_s10 then
-    // Log timer-based event
-    gosub logTimerEvent
-    // Reset timer
-    &fd100LogTimeAcc_m = 0
-    &fd100LogTimeAcc_s10 = 0
+// If we're in any state other than "awaiting command", then check to
+// see if we want to do a timer-based log
+if &fd100StepNum != fd100StepNum_WAITINS then
+  // If the logging timer is enabled (i.e. has a positive value) then 
+  // increment it and check if we're ready to log  
+  if &fd100LogTimePre_s10 >= 0 then
+    // Timer is enabled, increment it
+    &fd100LogTimeAcc_s10 = &fd100LogTimeAcc_s10 + &lastScanTimeShort
+    // Check if it's time to log
+    if &fd100LogTimeAcc_m >= &fd100LogTimePre_m\
+    and &fd100LogTimeAcc_s10 >= &fd100LogTimePre_s10 then
+      // Log timer-based event
+      gosub logTimerEvent
+      // Reset timer
+      &fd100LogTimeAcc_m = 0
+      &fd100LogTimeAcc_s10 = 0
+    endif
   endif
 endif
-
 //Create ONESHOT function for PB01... which is used to start sequence
 IF (|PB01_I = ON) THEN
   IF (|PB01_1 = OFF) THEN
