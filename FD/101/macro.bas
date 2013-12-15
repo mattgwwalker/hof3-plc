@@ -50,14 +50,14 @@ select &tempStepNum
 
   // *** Recirculating ***  
   
-  case fd101StepNum_RECIRC_TOP_SPEED_RAMP:
+  case fd101StepNum_RECIRC_TOP_SPEED_RAMP_UP:
     // If the Recirc flag is off, head back to the Bypass state
     if (|fd100_fd101_recirc=OFF) then
       &tempStepNum = fd101StepNum_BYPASS
     endif
     // If we've spent enough time here, we head to recirculating from the top
-    if ((&fd101StepTimeAcc_m >= &fd101StepTimePre_RECIRC_TOP_SPEED_RAMP_m) \
-    and (&fd101StepTimeAcc_s10 >= &fd101StepTimePre_RECIRC_TOP_SPEED_RAMP_s10)) then
+    if ((&fd101StepTimeAcc_m >= &fd101StepTimePre_RECIRC_TOP_SPEED_RAMP_UP_m) \
+    and (&fd101StepTimeAcc_s10 >= &fd101StepTimePre_RECIRC_TOP_SPEED_RAMP_UP_s10)) then
       &tempStepNum = fd101StepNum_RECIRC_TOP
     endif
 
@@ -88,18 +88,18 @@ select &tempStepNum
     // If we've spent enough time here, we head to ramping up the pump speed
     if ((&fd101StepTimeAcc_m >= &fd101StepTimePre_RECIRC_TO_BOTTOM_m) \
     and (&fd101StepTimeAcc_s10 >= &fd101StepTimePre_RECIRC_TO_BOTTOM_s10)) then
-      &tempStepNum = fd101StepNum_RECIRC_BOTTOM_SPEED_RAMP
+      &tempStepNum = fd101StepNum_RECIRC_BOTTOM_SPEED_RAMP_UP
     endif
 
 
-  case fd101StepNum_RECIRC_BOTTOM_SPEED_RAMP:
+  case fd101StepNum_RECIRC_BOTTOM_SPEED_RAMP_UP:
     // If the Recirc flag is off, head back to the Bypass state
     if (|fd100_fd101_recirc=OFF) then
       &tempStepNum = fd101StepNum_BYPASS
     endif
     // If we've spent enough time here, we head to recirculating from the bottom
-    if ((&fd101StepTimeAcc_m >= &fd101StepTimePre_RECIRC_BOTTOM_SPEED_RAMP_m) \
-    and (&fd101StepTimeAcc_s10 >= &fd101StepTimePre_RECIRC_BOTTOM_SPEED_RAMP_s10)) then
+    if ((&fd101StepTimeAcc_m >= &fd101StepTimePre_RECIRC_BOTTOM_SPEED_RAMP_UP_m) \
+    and (&fd101StepTimeAcc_s10 >= &fd101StepTimePre_RECIRC_BOTTOM_SPEED_RAMP_UP_s10)) then
       &tempStepNum = fd101StepNum_RECIRC_BOTTOM
     endif
    
@@ -130,7 +130,7 @@ select &tempStepNum
     // If we've spent enough time here, we head to ramping up the pump speed
     if ((&fd101StepTimeAcc_m >= &fd101StepTimePre_RECIRC_TO_TOP_m) \
     and (&fd101StepTimeAcc_s10 >= &fd101StepTimePre_RECIRC_TO_TOP_s10)) then
-      &tempStepNum = fd101StepNum_RECIRC_TOP_SPEED_RAMP
+      &tempStepNum = fd101StepNum_RECIRC_TOP_SPEED_RAMP_UP
     endif
 
 
@@ -162,7 +162,7 @@ select &tempStepNum
     // then we head back to RecircTop
     if ((&fd101StepTimeAcc_m >= &fd101StepTimePre_RECIRC_BW_RETRACT_m) \
     and (&fd101StepTimeAcc_s10 >= &fd101StepTimePre_RECIRC_BW_RETRACT_s10)) then
-      &tempStepNum = fd101StepNum_RECIRC_TOP_SPEED_RAMP
+      &tempStepNum = fd101StepNum_RECIRC_TOP_SPEED_RAMP_UP
       &fd101_BW_count = &fd101_BW_count + 1
       |fd101_PC03calc = ON
       // Log the maximum backwash pressure
@@ -193,7 +193,7 @@ select &tempStepNum
     // then we head back to RecircBottom
     if ((&fd101StepTimeAcc_m >= &fd101StepTimePre_RECIRC_BW_RETRACT_m) \
     and (&fd101StepTimeAcc_s10 >= &fd101StepTimePre_RECIRC_BW_RETRACT_s10)) then
-      &tempStepNum = fd101StepNum_RECIRC_BOTTOM_SPEED_RAMP
+      &tempStepNum = fd101StepNum_RECIRC_BOTTOM_SPEED_RAMP_UP
       &fd101_BW_count = &fd101_BW_count + 1
       |fd101_PC03calc = ON
       // Log the maximum backwash pressure
@@ -256,7 +256,7 @@ if (&tempStepNum != &fd101StepNum) then
 
     case fd101StepNum_BYPASS:
 
-    case fd101StepNum_RECIRC_TOP_SPEED_RAMP:
+    case fd101StepNum_RECIRC_TOP_SPEED_RAMP_UP:
 
     case fd101StepNum_RECIRC_TOP:
 
@@ -264,7 +264,7 @@ if (&tempStepNum != &fd101StepNum) then
       gosub reducePumpSpeedForDirChange
       gosub logDirectionChangeEvent
       
-    case fd101StepNum_RECIRC_BOTTOM_SPEED_RAMP:
+    case fd101StepNum_RECIRC_BOTTOM_SPEED_RAMP_UP:
 
     case fd101StepNum_RECIRC_BOTTOM:
 
@@ -312,10 +312,11 @@ select &tempStepNum
  
 
   case  fd101StepNum_BYPASS:
+    |fd101_IV06=OFF // OFF = Open the bypass
     |fd101_DV02=ON
 
 
-  case fd101StepNum_RECIRC_TOP_SPEED_RAMP:  
+  case fd101StepNum_RECIRC_TOP_SPEED_RAMP_UP:  
     // Check that we're not paused, and update the timers
     if (|fd100Fault_fd101_Pause=OFF) then
       &fd101DirTimeAcc_s10 = &fd101DirTimeAcc_s10 + &lastScanTimeShort
@@ -333,11 +334,11 @@ select &tempStepNum
     |fd101_RC01pidHold=ON
     gosub logFreezePIDsEvent
     // Ramp
-    if &fd101StepTimeAcc_m = &fd101StepTimePre_RECIRC_TOP_SPEED_RAMP_m \
-    and &fd101StepTimeAcc_s10 = &fd101StepTimePre_RECIRC_TOP_SPEED_RAMP_s10 then
+    if &fd101StepTimeAcc_m = &fd101StepTimePre_RECIRC_TOP_SPEED_RAMP_UP_m \
+    and &fd101StepTimeAcc_s10 = &fd101StepTimePre_RECIRC_TOP_SPEED_RAMP_UP_s10 then
       &PC01cv = &fd101_PreviousPumpSpeed
     else         
-      &PC01cv = (&fd101_PreviousPumpSpeed - &PC01cv) / (1.0 - (&fd101StepTimeAcc_m * 600.0 + &fd101StepTimeAcc_s10) / (&fd101StepTimePre_RECIRC_TOP_SPEED_RAMP_m * 600.0 + &fd101StepTimePre_RECIRC_TOP_SPEED_RAMP_s10)) * (&lastScanTimeShort / (&fd101StepTimePre_RECIRC_TOP_SPEED_RAMP_m * 600.0 + &fd101StepTimePre_RECIRC_TOP_SPEED_RAMP_s10)) + &PC01cv 
+      &PC01cv = (&fd101_PreviousPumpSpeed - &PC01cv) / (1.0 - (&fd101StepTimeAcc_m * 600.0 + &fd101StepTimeAcc_s10) / (&fd101StepTimePre_RECIRC_TOP_SPEED_RAMP_UP_m * 600.0 + &fd101StepTimePre_RECIRC_TOP_SPEED_RAMP_UP_s10)) * (&lastScanTimeShort / (&fd101StepTimePre_RECIRC_TOP_SPEED_RAMP_UP_m * 600.0 + &fd101StepTimePre_RECIRC_TOP_SPEED_RAMP_UP_s10)) + &PC01cv 
     endif
 
 
@@ -377,8 +378,8 @@ select &tempStepNum
     // and that the state has enough time to complete
     // Requires: IV06 delay off < IV05 delay off < DV0(1,2,3} delay on
     // Requires: time for this state > IV06 delay off + IV05 delay off + DV0{1,2,3} delay on
-    |fd101_IV06=OFF // OFF = Open the bypass
-    |fd101_IV05=OFF // OFF = No flow to membranes  
+    |fd101_IV06=ON // ON = Close the bypass
+    |fd101_IV05=ON // ON = Allow flow into membranes
     // ON = flow from the bottom
     |fd101_DV01=ON
     |fd101_DV02=ON
@@ -387,11 +388,11 @@ select &tempStepNum
     |fd101_DPC01pidHold=ON
     |fd101_PC01pidHold=ON
     |fd101_PC05pidHold=ON  
-    gosub PC05freezeOpen
+    gosub PC05freezePrevious // We tried freezing open but this suddenly drops P2, effectively spiking the along-membrane pressure
     |fd101_RC01pidHold=ON   
  
 
-  case fd101StepNum_RECIRC_BOTTOM_SPEED_RAMP:  
+  case fd101StepNum_RECIRC_BOTTOM_SPEED_RAMP_UP:  
     // Check that we're not paused, and update the timers
     if (|fd100Fault_fd101_Pause=OFF) then 
       &fd101DirTimeAcc_s10 = &fd101DirTimeAcc_s10 + &lastScanTimeShort
@@ -412,11 +413,11 @@ select &tempStepNum
     |fd101_RC01pidHold=ON
     gosub logFreezePIDsEvent
     // Ramp
-    if &fd101StepTimeAcc_m = &fd101StepTimePre_RECIRC_BOTTOM_SPEED_RAMP_m \
-    and &fd101StepTimeAcc_s10 = &fd101StepTimePre_RECIRC_BOTTOM_SPEED_RAMP_s10 then
+    if &fd101StepTimeAcc_m = &fd101StepTimePre_RECIRC_BOTTOM_SPEED_RAMP_UP_m \
+    and &fd101StepTimeAcc_s10 = &fd101StepTimePre_RECIRC_BOTTOM_SPEED_RAMP_UP_s10 then
       &PC01cv = &fd101_PreviousPumpSpeed
     else         
-      &PC01cv = (&fd101_PreviousPumpSpeed - &PC01cv) / (1.0 - (&fd101StepTimeAcc_m * 600.0 + &fd101StepTimeAcc_s10) / (&fd101StepTimePre_RECIRC_BOTTOM_SPEED_RAMP_m * 600.0 + &fd101StepTimePre_RECIRC_BOTTOM_SPEED_RAMP_s10)) * (&lastScanTimeShort / (&fd101StepTimePre_RECIRC_BOTTOM_SPEED_RAMP_m * 600.0 + &fd101StepTimePre_RECIRC_BOTTOM_SPEED_RAMP_s10)) + &PC01cv 
+      &PC01cv = (&fd101_PreviousPumpSpeed - &PC01cv) / (1.0 - (&fd101StepTimeAcc_m * 600.0 + &fd101StepTimeAcc_s10) / (&fd101StepTimePre_RECIRC_BOTTOM_SPEED_RAMP_UP_m * 600.0 + &fd101StepTimePre_RECIRC_BOTTOM_SPEED_RAMP_UP_s10)) * (&lastScanTimeShort / (&fd101StepTimePre_RECIRC_BOTTOM_SPEED_RAMP_UP_m * 600.0 + &fd101StepTimePre_RECIRC_BOTTOM_SPEED_RAMP_UP_s10)) + &PC01cv 
     endif
 
 
@@ -459,8 +460,8 @@ select &tempStepNum
     // and that the state has enough time to complete
     // Requires: IV06 delay off < IV05 delay off < DV0(1,2,3} delay off
     // Requires: time for this state > IV06 delay off + IV05 delay off + DV0{1,2,3} delay off
-    |fd101_IV06=OFF // OFF = Open the bypass
-    |fd101_IV05=OFF // OFF = No flow to membranes  
+    |fd101_IV06=ON // ON = Close the bypass
+    |fd101_IV05=ON // ON = Allow flow into membranes
     // OFF = flow from the top
     |fd101_DV01=OFF
     |fd101_DV02=OFF
@@ -469,7 +470,7 @@ select &tempStepNum
     |fd101_DPC01pidHold=ON
     |fd101_PC01pidHold=ON
     |fd101_PC05pidHold=ON  
-    gosub PC05freezeOpen
+    gosub PC05freezePrevious // We tried freezing open but this suddenly drops P2, effectively spiking the along-membrane pressure
     |fd101_RC01pidHold=ON
    
 
@@ -481,14 +482,14 @@ select &tempStepNum
     &fd101BWTimeAcc_m = 0
     // Fire the backwash device
     |fd101_BF01=ON
-    |fd101_IV06=OFF // OFF = Open the bypass
+    |fd101_IV06=ON // ON = Close the bypass
     // The flow through the membrane is from the top (because DV01 to DV03 are OFF)
-    |fd101_IV05=ON
+    |fd101_IV05=ON // ON = Allow flow into membranes
     // Freeze the PID Controllers for the duration of this state
     |fd101_DPC01pidHold=ON
     |fd101_PC01pidHold=ON
     |fd101_PC05pidHold=ON
-    gosub PC05freezeOpen  
+    gosub PC05freezePrevious // We tried freezing open but this suddenly drops P2, effectively spiking the along-membrane pressure
     |fd101_RC01pidHold=ON
     // Log the backwash pressures at every scan of the backwash
     gosub logDuringBackwashEvent
@@ -505,14 +506,14 @@ select &tempStepNum
     &fd101BWTimeAcc_m = 0
     // Retract the backwash device
     |fd101_BF01=OFF
-    |fd101_IV06=OFF // OFF = Open the bypass
+    |fd101_IV06=ON // ON = Close the bypass
     // The flow through the membrane is from the top (because DV01 to DV03 are OFF)
-    |fd101_IV05=ON
+    |fd101_IV05=ON // ON = Allow flow into membranes
     // Freeze the PID Controllers for the duration of this state
     |fd101_DPC01pidHold=ON
     |fd101_PC01pidHold=ON
     |fd101_PC05pidHold=ON
-    gosub PC05freezeOpen  
+    gosub PC05freezePrevious // We tried freezing open but this suddenly drops P2, effectively spiking the along-membrane pressure
     |fd101_RC01pidHold=ON
     // Log the backwash pressures at every scan of the backwash
     gosub logDuringBackwashRetractEvent
@@ -526,9 +527,9 @@ select &tempStepNum
     &fd101BWTimeAcc_m = 0
     // Fire the backwash device
     |fd101_BF01=ON
-    |fd101_IV06=OFF // OFF = Open the bypass
+    |fd101_IV06=ON // ON = Close the bypass
     //The flow through the membrane is from the bottom
-    |fd101_IV05=ON
+    |fd101_IV05=ON // ON = Allow flow into membranes
     |fd101_DV01=ON
     |fd101_DV02=ON
     |fd101_DV03=ON  
@@ -536,7 +537,7 @@ select &tempStepNum
     |fd101_DPC01pidHold=ON
     |fd101_PC01pidHold=ON
     |fd101_PC05pidHold=ON
-    gosub PC05freezeOpen  
+    gosub PC05freezePrevious // We tried freezing open but this suddenly drops P2, effectively spiking the along-membrane pressure
     |fd101_RC01pidHold=ON
     // Log the backwash pressures at every scan of the backwash
     gosub logDuringBackwashEvent
@@ -554,9 +555,9 @@ select &tempStepNum
     &fd101BWTimeAcc_m = 0
     // Retract the backwash device
     |fd101_BF01=OFF
-    |fd101_IV06=OFF // OFF = Open the bypass
+    |fd101_IV06=ON // ON = Close the bypass
     //The flow through the membrane is from the bottom
-    |fd101_IV05=ON
+    |fd101_IV05=ON // ON = Allow flow into membranes
     |fd101_DV01=ON
     |fd101_DV02=ON
     |fd101_DV03=ON  
@@ -564,7 +565,7 @@ select &tempStepNum
     |fd101_DPC01pidHold=ON
     |fd101_PC01pidHold=ON
     |fd101_PC05pidHold=ON
-    gosub PC05freezeOpen  
+    gosub PC05freezePrevious // We tried freezing open but this suddenly drops P2, effectively spiking the along-membrane pressure
     |fd101_RC01pidHold=ON
     // Log the backwash pressures at every scan of the backwash
     gosub logDuringBackwashRetractEvent
