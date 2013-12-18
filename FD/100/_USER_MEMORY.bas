@@ -47,29 +47,30 @@ MEM &fd100Faultcmd_resetMsg = 0
 
 DIM fd100Faultcmd_resetMsgArray[] = \
 [" ",\
-"1.Main Feed Pump Fault",\
-"2.Pause Pushbutton Activated",\
-"3.Estop Activated",\
-"4.No Water Pressure",\
-"5.No High Pressure Air",\
-"6.No Low Pressure Air",\
-"7.No Main Feed Pump Seal Water",\
-"8.Feed tank full of Product",\
-"9.Feed tank empty of Product",\
-"10.Feed tank full of Rinse Water",\
-"11.Feed tank empty of Rinse Water",\
-"12.Feed tank full of CIP Chem",\
-"13.Feed tank empty of CIP Chem",\
-"14.Pause Selection Activated",\
-"15.Feed tank Fill Max Time Expired",\
-"16.Feed tank Temperature Too Low",\
-"17.Feed tank Temperature Too High",\
-"18.Inlet Pressure High",\
-"19.Transmembrane Pressure High",\
-"20.Back Pressure High",\
-"21.Along Membrane Pressure High",\
-"22.Feed tank pH Too Low",\
-"23.Feed tank pH Too High",\
+"1. Main Feed Pump Fault",\
+"2. Pause Pushbutton Activated",\
+"3. Estop Activated",\
+"4. No Water Pressure",\
+"5. No High Pressure Air",\
+"6. No Low Pressure Air",\
+"7. No Main Feed Pump Seal Water",\
+"8. Feed tank full of Product",\
+"9. Feed tank empty of Product",\
+"10. Feed tank full of Rinse Water",\
+"11. Feed tank empty of Rinse Water",\
+"12. Feed tank full of CIP Chem",\
+"13. Feed tank empty of CIP Chem",\
+"14. Pause Selection Activated",\
+"15. Feed tank Fill Max Time Expired",\
+"16. Feed tank Temperature Too Low",\
+"17. Feed tank Temperature Too High",\
+"18. Inlet Pressure High",\
+"19. Transmembrane Pressure High",\
+"20. Back Pressure High",\
+"21. Along Membrane Pressure High",\
+"22. Feed tank pH Too Low",\
+"23. Feed tank pH Too High",\
+"24. Pressure drop across the bag filter is too high",\
 ""]
 
 REG &fd100ProgOut01 = &USER_MEMORY_905
@@ -209,7 +210,7 @@ MEM &fd100Status = fd100Status_UNKNOWN
 
 //Fill Time 
 REG &fd100StepTimePre_FILL_s10 = &USER_MEMORY_926
-MEM &fd100StepTimePre_FILL_s10 = 200
+MEM &fd100StepTimePre_FILL_s10 = 250 // 25 seconds
 REG &fd100StepTimePre_FILL_m = &USER_MEMORY_927
 MEM &fd100StepTimePre_FILL_m = 0
 

@@ -623,7 +623,7 @@ select &tempStepNum
   &V1x_last = 0.0
   &R01_last = 1.0
   &R01 = 1.0 
- 
+  
 
  case fd100StepNum_PB: //Awaiting Pushbutton
   &V1x_last = 0.0
@@ -650,12 +650,12 @@ select &tempStepNum
   |fd100_fd100Fault_enable1 = ON
   |fd100_fd100Fault_FILL = ON
   |fd100_DV06en1 = ON //Energise If Fill Source is WATER  
-  |fd100_IL01 = ON //PB01 LED Light
+  |fd100_IL01 = ON    //PB01 LED Light
   |fd100_IV08en1 = ON //Energise If Fill Source is SITE and Level Low 
   |fd100_IV10en1 = ON //Energise If Fill Source is WATER and Level Low 
-  |fd100_IV15 = ON //Seal Water
+  |fd100_IV15 = ON    //Seal Water
   |fd100_PP03en1 = ON //Fill from Storage Tank 
-  |fd100_PC05so = ON //Open CV01 to enable recirc
+  |fd100_PC05so = ON  //Open CV01 to enable recirc
  
 
  case fd100StepNum_MIX: //Production or CIP Chemical Wash - Mix Via Bypass Line
@@ -945,6 +945,9 @@ if (|fd100Fault_msg1 = ON) then
   ELSIF (&PH01_100 > &PH01SP02) THEN
     // pH is too high
     &OPmsg = 23                  
+  ELSIF (&DPT02_1000 > &DPT02SP01) THEN
+    // across bag-filter pressure drop is too high
+    &OPmsg = 24                  
   ENDIF
  
 endif

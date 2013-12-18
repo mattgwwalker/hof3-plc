@@ -53,19 +53,19 @@ logFreezePIDsEvent:
   return
 
 
-// Reduce pump speed for direction changes
-reducePumpSpeedForDirChange:
-  // Copy current pump speed
-  &fd101_PreviousPumpSpeed = &PC01cv
-  // Decrease pump speed (proportion is between 0 and 10,000)
-  &PC01cv = (1.0 * &PC01cv) * (&fd101_Dir_PumpSpeedProportion / 10000.0) 
+
+
+// Check that we're not paused and update the timers
+updateTimers:
+  if (|fd100Fault_fd101_Pause=OFF) then
+    &fd101DirTimeAcc_s10 = &fd101DirTimeAcc_s10 + &lastScanTimeShort
+    &fd101BWTimeAcc_s10 = &fd101BWTimeAcc_s10 + &lastScanTimeShort
+    &fd101StepTimeAcc_s10 = &fd101StepTimeAcc_s10 + &lastScanTimeShort
+  endif 
   return
   
-
-// Reduce pump speed for backwash
-reducePumpSpeedForBackwash:
-  // Copy current pump speed
-  &fd101_PreviousPumpSpeed = &PC01cv
-  // Decrease pump speed (proportion is between 0 and 10,000)
-  &PC01cv = (1.0 * &PC01cv) * (&fd101_BW_PumpSpeedProportion / 10000.0) 
+  
+// Calculate the target slow-pump-speed based on the proportion of current speed
+calcSlowPumpSpeed:
+  &fd101_SlowPumpSpeed = (1.0 * &PC01cv) * (&fd101_SlowPumpSpeedProportion / 10000.0)
   return

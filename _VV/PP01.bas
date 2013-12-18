@@ -3,7 +3,7 @@
 //
 
 if ((|fd100_PP01=ON)\
- AND (|fd100Fault_PP01pause = OFF))  then
+ and (|fd100Fault_PP01pause = OFF))  then
   |PP01autoOut = ON
 else
   |PP01autoOut = OFF

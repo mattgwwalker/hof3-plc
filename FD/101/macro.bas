@@ -67,17 +67,55 @@ select &tempStepNum
     if (|fd100_fd101_recirc=OFF) then
       &tempStepNum = fd101StepNum_BYPASS
     endif
-    // If we've spent enough time here, we head to RecircToBottom
-    if ((&fd101DirTimeAcc_m >= &fd101DirTimePre_RECIRC_m) \
-    and (&fd101DirTimeAcc_s10 >= &fd101DirTimePre_RECIRC_s10)) then
-      &tempStepNum = fd101StepNum_RECIRC_TO_BOTTOM
+    // If it's time to do a direction change, we head off to slow the pump
+    if  &fd101DirTimeAcc_m >= &fd101DirTimePre_RECIRC_m \
+    and &fd101DirTimeAcc_s10 >= &fd101DirTimePre_RECIRC_s10 \
+    and &fd101DirTimePre_RECIRC_s10 > -1 then // Putting a negative value into the timer disables direction changes
+      &tempStepNum = fd101StepNum_RECIRC_TOP_SPEED_RAMP_DOWN
     endif
-    // If we're ready to do a backwash, head to RecircBackwashTop
-    if ((&fd101BWTimeAcc_m >= &fd101BWTimePre_RECIRC_m) \
-    and (&fd101BWTimeAcc_s10 >= &fd101BWTimePre_RECIRC_s10)\
-    and (&fd101BWTimePre_RECIRC_s10 > -1)) then // Putting a negative value into the timer disables backwashes
+    // Or if it's time to do a backwash, we head off to slow the pump
+    if  &fd101BWTimeAcc_m >= &fd101BWTimePre_RECIRC_m \
+    and &fd101BWTimeAcc_s10 >= &fd101BWTimePre_RECIRC_s10\
+    and &fd101BWTimePre_RECIRC_s10 > -1 then // Putting a negative value into the timer disables backwashes
+      &tempStepNum = fd101StepNum_RECIRC_TOP_SPEED_RAMP_DOWN
+    endif
+
+
+  case fd101StepNum_RECIRC_TOP_SPEED_RAMP_DOWN:
+    // If the Recirc flag is off, head back to the Bypass state
+    if (|fd100_fd101_recirc=OFF) then
+      &tempStepNum = fd101StepNum_BYPASS
+    endif
+    // If we've finished slowing down, we need to work out where to go next
+    if ((&fd101StepTimeAcc_m >= &fd101StepTimePre_RECIRC_TOP_SPEED_RAMP_DOWN_m) \
+    and (&fd101StepTimeAcc_s10 >= &fd101StepTimePre_RECIRC_TOP_SPEED_RAMP_DOWN_s10)) then
+      &tempStepNum = fd101StepNum_RECIRC_TOP_SLOW
+    endif
+
+
+  case fd101StepNum_RECIRC_TOP_SLOW:
+    // If the Recirc flag is off, head back to the Bypass state
+    if (|fd100_fd101_recirc=OFF) then
+      &tempStepNum = fd101StepNum_BYPASS
+    endif
+
+    // Check if it's time to do a backwash
+    if  &fd101BWTimeAcc_m >= &fd101BWTimePre_RECIRC_m \
+    and &fd101BWTimeAcc_s10 >= &fd101BWTimePre_RECIRC_s10\
+    and &fd101BWTimePre_RECIRC_s10 > -1 then // Putting a negative value into the timer disables backwashes
       &tempStepNum = fd101StepNum_RECIRC_BW_TOP
+
+    // Check if it's time to do a direction change
+    elsif &fd101DirTimeAcc_m >= &fd101DirTimePre_RECIRC_m \
+    and &fd101DirTimeAcc_s10 >= &fd101DirTimePre_RECIRC_s10 \
+    and &fd101DirTimePre_RECIRC_s10 > -1 then // Putting a negative value into the timer disables direction changes
+      &tempStepNum = fd101StepNum_RECIRC_TO_BOTTOM
+
+    // Otherwise we must have done what we came here to do, so speed back up
+    else
+      &tempStepNum = fd101StepNum_RECIRC_TOP_SPEED_RAMP_UP
     endif
+      
   
    
   case fd101StepNum_RECIRC_TO_BOTTOM:
@@ -85,10 +123,12 @@ select &tempStepNum
     if (|fd100_fd101_recirc=OFF) then
       &tempStepNum = fd101StepNum_BYPASS
     endif
-    // If we've spent enough time here, we head to ramping up the pump speed
+    // If we've spent enough time here, and thus made the change to flow from
+    // the bottom of the membrane, we then check to see if we should first do a
+    // backwash before we bring the pump speed back up
     if ((&fd101StepTimeAcc_m >= &fd101StepTimePre_RECIRC_TO_BOTTOM_m) \
     and (&fd101StepTimeAcc_s10 >= &fd101StepTimePre_RECIRC_TO_BOTTOM_s10)) then
-      &tempStepNum = fd101StepNum_RECIRC_BOTTOM_SPEED_RAMP_UP
+      &tempStepNum = fd101StepNum_RECIRC_BOTTOM_SLOW
     endif
 
 
@@ -109,28 +149,66 @@ select &tempStepNum
     if (|fd100_fd101_recirc=OFF) then
       &tempStepNum = fd101StepNum_BYPASS
     endif
-    // If we've spent enough time here, we head to RecircToTop
+    // If it's time to do a direction change, we head off to slow the pump
     if ((&fd101DirTimeAcc_m >= &fd101DirTimePre_RECIRC_m) \
     and (&fd101DirTimeAcc_s10 >= &fd101DirTimePre_RECIRC_s10)) then
-      &tempStepNum = fd101StepNum_RECIRC_TO_TOP
+      &tempStepNum = fd101StepNum_RECIRC_BOTTOM_SPEED_RAMP_DOWN
     endif
-    // If we're ready to do a backwash, head to RecircBackwashBottom
+    // Or if it's time to do a backwash, we head off to slow the pump
     if ((&fd101BWTimeAcc_m >= &fd101BWTimePre_RECIRC_m) \
     and (&fd101BWTimeAcc_s10 >= &fd101BWTimePre_RECIRC_s10)\
     and (&fd101BWTimePre_RECIRC_s10 > -1)) then  // Putting a negative value into the timer disables backwashes
-      &tempStepNum = fd101StepNum_RECIRC_BW_BOTTOM
+      &tempStepNum = fd101StepNum_RECIRC_BOTTOM_SPEED_RAMP_DOWN
     endif
    
+
+  case fd101StepNum_RECIRC_BOTTOM_SPEED_RAMP_DOWN:
+    // If the Recirc flag is off, head back to the Bypass state
+    if (|fd100_fd101_recirc=OFF) then
+      &tempStepNum = fd101StepNum_BYPASS
+    endif
+    // If we've finished slowing down, we need to work out where to go next
+    if ((&fd101StepTimeAcc_m >= &fd101StepTimePre_RECIRC_BOTTOM_SPEED_RAMP_DOWN_m) \
+    and (&fd101StepTimeAcc_s10 >= &fd101StepTimePre_RECIRC_BOTTOM_SPEED_RAMP_DOWN_s10)) then
+      &tempStepNum = fd101StepNum_RECIRC_BOTTOM_SLOW
+    endif
+
+
+  case fd101StepNum_RECIRC_BOTTOM_SLOW:
+    // If the Recirc flag is off, head back to the Bypass state
+    if (|fd100_fd101_recirc=OFF) then
+      &tempStepNum = fd101StepNum_BYPASS
+    endif
+
+    // Check if it's time to do a backwash
+    if  &fd101BWTimeAcc_m >= &fd101BWTimePre_RECIRC_m \
+    and &fd101BWTimeAcc_s10 >= &fd101BWTimePre_RECIRC_s10\
+    and &fd101BWTimePre_RECIRC_s10 > -1 then // Putting a negative value into the timer disables backwashes
+      &tempStepNum = fd101StepNum_RECIRC_BW_BOTTOM
+
+    // Check if it's time to do a direction change
+    elsif &fd101DirTimeAcc_m >= &fd101DirTimePre_RECIRC_m \
+    and &fd101DirTimeAcc_s10 >= &fd101DirTimePre_RECIRC_s10 \
+    and &fd101DirTimePre_RECIRC_s10 > -1 then // Putting a negative value into the timer disables direction changes
+      &tempStepNum = fd101StepNum_RECIRC_TO_TOP
+
+    // Otherwise we must have done what we came here to do, so speed back up
+    else
+      &tempStepNum = fd101StepNum_RECIRC_BOTTOM_SPEED_RAMP_UP
+    endif
+
 
   case  fd101StepNum_RECIRC_TO_TOP:
     // If the Recirc flag is off, head back to the Bypass state
     if (|fd100_fd101_recirc=OFF) then
       &tempStepNum = fd101StepNum_BYPASS
     endif
-    // If we've spent enough time here, we head to ramping up the pump speed
+    // If we've spent enough time here, and thus made the change to flow from
+    // the top of the membrane, we then check to see if we should first do a
+    // backwash before we bring the pump speed back up
     if ((&fd101StepTimeAcc_m >= &fd101StepTimePre_RECIRC_TO_TOP_m) \
     and (&fd101StepTimeAcc_s10 >= &fd101StepTimePre_RECIRC_TO_TOP_s10)) then
-      &tempStepNum = fd101StepNum_RECIRC_TOP_SPEED_RAMP_UP
+      &tempStepNum = fd101StepNum_RECIRC_TOP_SLOW
     endif
 
 
@@ -162,11 +240,11 @@ select &tempStepNum
     // then we head back to RecircTop
     if ((&fd101StepTimeAcc_m >= &fd101StepTimePre_RECIRC_BW_RETRACT_m) \
     and (&fd101StepTimeAcc_s10 >= &fd101StepTimePre_RECIRC_BW_RETRACT_s10)) then
-      &tempStepNum = fd101StepNum_RECIRC_TOP_SPEED_RAMP_UP
       &fd101_BW_count = &fd101_BW_count + 1
       |fd101_PC03calc = ON
       // Log the maximum backwash pressure
       gosub logMaxBackwashPressure
+      &tempStepNum = fd101StepNum_RECIRC_TOP_SLOW
     endif
 
     
@@ -260,33 +338,43 @@ if (&tempStepNum != &fd101StepNum) then
 
     case fd101StepNum_RECIRC_TOP:
 
+    case fd101StepNum_RECIRC_TOP_SPEED_RAMP_DOWN:
+      // Copy current pump speed
+      &fd101_PreviousPumpSpeed = &PC01cv
+      gosub calcSlowPumpSpeed
+    
+    case fd101StepNum_RECIRC_TOP_SLOW:
+
     case fd101StepNum_RECIRC_TO_BOTTOM:
-      gosub reducePumpSpeedForDirChange
       gosub logDirectionChangeEvent
       
     case fd101StepNum_RECIRC_BOTTOM_SPEED_RAMP_UP:
 
     case fd101StepNum_RECIRC_BOTTOM:
 
+    case fd101StepNum_RECIRC_BOTTOM_SPEED_RAMP_DOWN:
+      // Copy current pump speed
+      &fd101_PreviousPumpSpeed = &PC01cv
+      gosub calcSlowPumpSpeed
+
+    case fd101StepNum_RECIRC_BOTTOM_SLOW:
+
     case fd101StepNum_RECIRC_TO_TOP:
-      gosub reducePumpSpeedForDirChange
       gosub logDirectionChangeEvent
 
     case fd101StepNum_RECIRC_BW_TOP:
-      gosub reducePumpSpeedForBackwash
-      gosub logBackwashEvent
       // When we start backwashing, set the initial value for maximum 
       // observed pressure to the current value of PT03
       &fd101_BW_PT03max = &PT03_1000
+      gosub logBackwashEvent
 
     case fd101StepNum_RECIRC_BW_TOP_RETRACT:
 
     case fd101StepNum_RECIRC_BW_BOTTOM:
-      gosub reducePumpSpeedForBackwash
-      gosub logBackwashEvent
       // When we start backwashing, set the initial value for maximum 
       // observed pressure to the current value of PT03
       &fd101_BW_PT03max = &PT03_1000
+      gosub logBackwashEvent
 
     case fd101StepNum_RECIRC_BW_BOTTOM_RETRACT:
 
@@ -318,11 +406,7 @@ select &tempStepNum
 
   case fd101StepNum_RECIRC_TOP_SPEED_RAMP_UP:  
     // Check that we're not paused, and update the timers
-    if (|fd100Fault_fd101_Pause=OFF) then
-      &fd101DirTimeAcc_s10 = &fd101DirTimeAcc_s10 + &lastScanTimeShort
-      &fd101BWTimeAcc_s10 = &fd101BWTimeAcc_s10 + &lastScanTimeShort
-      &fd101StepTimeAcc_s10 = &fd101StepTimeAcc_s10 + &lastScanTimeShort
-    endif 
+    gosub updateTimers
     // Requires: IV05 delay on < IV06 delay on
     // Requires: time for this state > IV05 delay on + IV06 delay on (DV0{1,2,3} aren't changing)
     |fd101_IV05=ON // ON = Allow flow into membranes
@@ -333,7 +417,7 @@ select &tempStepNum
     |fd101_PC05pidHold=ON  
     |fd101_RC01pidHold=ON
     gosub logFreezePIDsEvent
-    // Ramp
+    // Ramp up pump speed
     if &fd101StepTimeAcc_m = &fd101StepTimePre_RECIRC_TOP_SPEED_RAMP_UP_m \
     and &fd101StepTimeAcc_s10 = &fd101StepTimePre_RECIRC_TOP_SPEED_RAMP_UP_s10 then
       &PC01cv = &fd101_PreviousPumpSpeed
@@ -344,11 +428,7 @@ select &tempStepNum
 
   case  fd101StepNum_RECIRC_TOP:
     // Check that we're not paused, and update the timers
-    if (|fd100Fault_fd101_Pause=OFF) then
-      &fd101DirTimeAcc_s10 = &fd101DirTimeAcc_s10 + &lastScanTimeShort
-      &fd101BWTimeAcc_s10 = &fd101BWTimeAcc_s10 + &lastScanTimeShort
-      &fd101StepTimeAcc_s10 = &fd101StepTimeAcc_s10 + &lastScanTimeShort
-    endif 
+    gosub updateTimers
     // Requires: IV05 delay on < IV06 delay on
     // Requires: time for this state > IV05 delay on + IV06 delay on (DV0{1,2,3} aren't changing)
     |fd101_IV05=ON // ON = Allow flow into membranes
@@ -367,12 +447,49 @@ select &tempStepNum
     endif   
 
 
+  case fd101StepNum_RECIRC_TOP_SPEED_RAMP_DOWN:  
+    // Check that we're not paused, and update the timers
+    gosub updateTimers
+    |fd101_IV05=ON // ON = Allow flow into membranes
+    |fd101_IV06=ON // ON = Close the bypass
+    // Freeze PID loops
+    |fd101_DPC01pidHold=ON
+    |fd101_PC01pidHold=ON
+    |fd101_PC05pidHold=ON  
+    |fd101_RC01pidHold=ON
+    gosub logFreezePIDsEvent
+    // Ramp down pump speed 
+    if &fd101StepTimeAcc_m = &fd101StepTimePre_RECIRC_TOP_SPEED_RAMP_DOWN_m \
+    and &fd101StepTimeAcc_s10 = &fd101StepTimePre_RECIRC_TOP_SPEED_RAMP_DOWN_s10 then
+      &PC01cv = &fd101_SlowPumpSpeed
+    else         
+      &PC01cv = (&fd101_SlowPumpSpeed - &PC01cv) / (1.0 - (&fd101StepTimeAcc_m * 600.0 + &fd101StepTimeAcc_s10) / (&fd101StepTimePre_RECIRC_TOP_SPEED_RAMP_DOWN_m * 600.0 + &fd101StepTimePre_RECIRC_TOP_SPEED_RAMP_DOWN_s10)) * (&lastScanTimeShort / (&fd101StepTimePre_RECIRC_TOP_SPEED_RAMP_DOWN_m * 600.0 + &fd101StepTimePre_RECIRC_TOP_SPEED_RAMP_DOWN_s10)) + &PC01cv 
+    endif
+
+
+  case fd101StepNum_RECIRC_TOP_SLOW:  
+    // Check that we're not paused, and update the timers
+    gosub updateTimers
+    |fd101_IV05=ON // ON = Allow flow into membranes
+    |fd101_IV06=ON // ON = Close the bypass
+    // Freeze PID loops
+    |fd101_DPC01pidHold=ON
+    |fd101_PC01pidHold=ON
+    |fd101_PC05pidHold=ON  
+    |fd101_RC01pidHold=ON
+    gosub logFreezePIDsEvent
+    // Ensure speed's at the slow target 
+    &PC01cv = &fd101_SlowPumpSpeed
+
+
+
   case  fd101StepNum_RECIRC_TO_BOTTOM:
+    // Check that we're not paused, and update the timers
+    gosub updateTimers
     // In this state we're changing to a membrane flow that will be from the bottom
-    // Reset the direction change timer to zero
+    // so reset the direction change timer to zero
     &fd101DirTimeAcc_s10 = 0
     &fd101DirTimeAcc_m = 0
-    &fd101StepTimeAcc_s10 = &fd101StepTimeAcc_s10 + &lastScanTimeShort
     // Change the direction of the flow in the membrane
     // It's critical that each of the valves' delay timers are correctly set
     // and that the state has enough time to complete
@@ -394,11 +511,7 @@ select &tempStepNum
 
   case fd101StepNum_RECIRC_BOTTOM_SPEED_RAMP_UP:  
     // Check that we're not paused, and update the timers
-    if (|fd100Fault_fd101_Pause=OFF) then 
-      &fd101DirTimeAcc_s10 = &fd101DirTimeAcc_s10 + &lastScanTimeShort
-      &fd101BWTimeAcc_s10 = &fd101BWTimeAcc_s10 + &lastScanTimeShort
-      &fd101StepTimeAcc_s10 = &fd101StepTimeAcc_s10 + &lastScanTimeShort
-    endif 
+    gosub updateTimers
     // Requires: IV05 delay on < IV06 delay on
     // Requires: time for this state > IV05 delay on + IV06 delay on (DV0{1,2,3} aren't changing)
     |fd101_IV05=ON // ON = flow to the membranes
@@ -424,11 +537,7 @@ select &tempStepNum
 
   case  fd101StepNum_RECIRC_BOTTOM:
     // Check that we're not paused, and update the timers
-    if (|fd100Fault_fd101_Pause=OFF) then 
-      &fd101DirTimeAcc_s10 = &fd101DirTimeAcc_s10 + &lastScanTimeShort
-      &fd101BWTimeAcc_s10 = &fd101BWTimeAcc_s10 + &lastScanTimeShort
-      &fd101StepTimeAcc_s10 = &fd101StepTimeAcc_s10 + &lastScanTimeShort
-    endif 
+    gosub updateTimers
     // Requires: IV05 delay on < IV06 delay on
     // Requires: time for this state > IV05 delay on + IV06 delay on (DV0{1,2,3} aren't changing)
     |fd101_IV05=ON // ON = flow to the membranes
@@ -449,12 +558,55 @@ select &tempStepNum
       gosub PC05unfreeze
     endif
 
+
+  case fd101StepNum_RECIRC_BOTTOM_SPEED_RAMP_DOWN:  
+    // Check that we're not paused, and update the timers
+    gosub updateTimers
+    |fd101_IV05=ON // ON = Allow flow into membranes
+    |fd101_IV06=ON // ON = Close the bypass
+    |fd101_DV01=ON // ON = flow from the bottom
+    |fd101_DV02=ON
+    |fd101_DV03=ON
+    // Freeze PID loops
+    |fd101_DPC01pidHold=ON
+    |fd101_PC01pidHold=ON
+    |fd101_PC05pidHold=ON  
+    |fd101_RC01pidHold=ON
+    gosub logFreezePIDsEvent
+    // Ramp down pump speed 
+    if &fd101StepTimeAcc_m = &fd101StepTimePre_RECIRC_BOTTOM_SPEED_RAMP_DOWN_m \
+    and &fd101StepTimeAcc_s10 = &fd101StepTimePre_RECIRC_BOTTOM_SPEED_RAMP_DOWN_s10 then
+      &PC01cv = &fd101_SlowPumpSpeed
+    else         
+      &PC01cv = (&fd101_SlowPumpSpeed - &PC01cv) / (1.0 - (&fd101StepTimeAcc_m * 600.0 + &fd101StepTimeAcc_s10) / (&fd101StepTimePre_RECIRC_BOTTOM_SPEED_RAMP_DOWN_m * 600.0 + &fd101StepTimePre_RECIRC_BOTTOM_SPEED_RAMP_DOWN_s10)) * (&lastScanTimeShort / (&fd101StepTimePre_RECIRC_BOTTOM_SPEED_RAMP_DOWN_m * 600.0 + &fd101StepTimePre_RECIRC_BOTTOM_SPEED_RAMP_DOWN_s10)) + &PC01cv 
+    endif
+
+
+  case fd101StepNum_RECIRC_BOTTOM_SLOW:  
+    // Check that we're not paused, and update the timers
+    gosub updateTimers
+    |fd101_IV05=ON // ON = Allow flow into membranes
+    |fd101_IV06=ON // ON = Close the bypass
+    |fd101_DV01=ON // ON = flow from the bottom
+    |fd101_DV02=ON
+    |fd101_DV03=ON
+    // Freeze PID loops
+    |fd101_DPC01pidHold=ON
+    |fd101_PC01pidHold=ON
+    |fd101_PC05pidHold=ON  
+    |fd101_RC01pidHold=ON
+    gosub logFreezePIDsEvent
+    // Ensure speed's at the slow target 
+    &PC01cv = &fd101_SlowPumpSpeed
+
+
   case  fd101StepNum_RECIRC_TO_TOP:
+    // Check that we're not paused, and update the timers
+    gosub updateTimers
     // In this state we're changing to a membrane flow that will be from the top
-    // Reset the direction change timer to zero
+    // so reset the direction change timer to zero
     &fd101DirTimeAcc_s10 = 0
     &fd101DirTimeAcc_m = 0
-    &fd101StepTimeAcc_s10 = &fd101StepTimeAcc_s10 + &lastScanTimeShort
     // Change the direction of the flow in the membrane
     // It's critical that each of the valves' delay timers are correctly set
     // and that the state has enough time to complete
@@ -472,6 +624,9 @@ select &tempStepNum
     |fd101_PC05pidHold=ON  
     gosub PC05freezePrevious // We tried freezing open but this suddenly drops P2, effectively spiking the along-membrane pressure
     |fd101_RC01pidHold=ON
+
+
+  // *** Backwashing ***
    
 
   case  fd101StepNum_RECIRC_BW_TOP:

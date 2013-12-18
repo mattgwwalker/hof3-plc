@@ -26,28 +26,46 @@ MEM &fd101StepTimeAcc_s10 = 0
 REG &fd101StepTimeAcc_m = &USER_MEMORY_933
 MEM &fd101StepTimeAcc_m = 0
 
+
 // The four second delay on the following two timers was optimised by Peter and
 // Matthew 22-11-2013.  These values need to be considered along with the delay
 // times for valves IV05, IV06, and DV0{1,2,3}.
+REG &fd101StepTimePre_RECIRC_TO_TOP_s10 = &USER_MEMORY_936
+MEM &fd101StepTimePre_RECIRC_TO_TOP_s10 = 40 // four seconds
+REG &fd101StepTimePre_RECIRC_TO_TOP_m = &USER_MEMORY_937
+MEM &fd101StepTimePre_RECIRC_TO_TOP_m = 0
+
 REG &fd101StepTimePre_RECIRC_TO_BOTTOM_s10 = &USER_MEMORY_934
 MEM &fd101StepTimePre_RECIRC_TO_BOTTOM_s10 = 40 // four seconds 
 REG &fd101StepTimePre_RECIRC_TO_BOTTOM_m = &USER_MEMORY_935
 MEM &fd101StepTimePre_RECIRC_TO_BOTTOM_m = 0
+
+// These two ramp durations are two protect the membrane from the shock of a 
+// sudden increase in inlet pressure
+REG &fd101StepTimePre_RECIRC_TOP_SPEED_RAMP_UP_s10 = &USER_MEMORY_959
+MEM &fd101StepTimePre_RECIRC_TOP_SPEED_RAMP_UP_s10 = 40 // four seconds
+REG &fd101StepTimePre_RECIRC_TOP_SPEED_RAMP_UP_m = &USER_MEMORY_960
+MEM &fd101StepTimePre_RECIRC_TOP_SPEED_RAMP_UP_m = 0
 
 REG &fd101StepTimePre_RECIRC_BOTTOM_SPEED_RAMP_UP_s10 = &USER_MEMORY_957
 MEM &fd101StepTimePre_RECIRC_BOTTOM_SPEED_RAMP_UP_s10 = 40 // four seconds 
 REG &fd101StepTimePre_RECIRC_BOTTOM_SPEED_RAMP_UP_m = &USER_MEMORY_958
 MEM &fd101StepTimePre_RECIRC_BOTTOM_SPEED_RAMP_UP_m = 0
 
-REG &fd101StepTimePre_RECIRC_TO_TOP_s10 = &USER_MEMORY_936
-MEM &fd101StepTimePre_RECIRC_TO_TOP_s10 = 40 // four seconds
-REG &fd101StepTimePre_RECIRC_TO_TOP_m = &USER_MEMORY_937
-MEM &fd101StepTimePre_RECIRC_TO_TOP_m = 0
+// These two ramp durations are to protect the pump and the VSD (which is 
+// acting as a brake when slowing).  Specifically of concern is that the 
+// nut holding the impeller to the motor shaft will loosen if slowed suddenly.
+REG &fd101StepTimePre_RECIRC_TOP_SPEED_RAMP_DOWN_s10 = &USER_MEMORY_964
+MEM &fd101StepTimePre_RECIRC_TOP_SPEED_RAMP_DOWN_s10 = 40 // four seconds 
+REG &fd101StepTimePre_RECIRC_TOP_SPEED_RAMP_DOWN_m = &USER_MEMORY_965
+MEM &fd101StepTimePre_RECIRC_TOP_SPEED_RAMP_DOWN_m = 0
 
-REG &fd101StepTimePre_RECIRC_TOP_SPEED_RAMP_UP_s10 = &USER_MEMORY_959
-MEM &fd101StepTimePre_RECIRC_TOP_SPEED_RAMP_UP_s10 = 40 // four seconds
-REG &fd101StepTimePre_RECIRC_TOP_SPEED_RAMP_UP_m = &USER_MEMORY_960
-MEM &fd101StepTimePre_RECIRC_TOP_SPEED_RAMP_UP_m = 0
+REG &fd101StepTimePre_RECIRC_BOTTOM_SPEED_RAMP_DOWN_s10 = &USER_MEMORY_966
+MEM &fd101StepTimePre_RECIRC_BOTTOM_SPEED_RAMP_DOWN_s10 = 40 // four seconds 
+REG &fd101StepTimePre_RECIRC_BOTTOM_SPEED_RAMP_DOWN_m = &USER_MEMORY_967
+MEM &fd101StepTimePre_RECIRC_BOTTOM_SPEED_RAMP_DOWN_m = 0
+
+
 
 REG &fd101StepTimePre_RECIRC_BW_TOP_s10 = &USER_MEMORY_938
 MEM &fd101StepTimePre_RECIRC_BW_TOP_s10 = 50
@@ -101,11 +119,14 @@ MEM &fd101_BW_LoggingEnabled = 0
 
 // User memory 957 to 960 used above
 
-REG &fd101_Dir_PumpSpeedProportion = &USER_MEMORY_961
-MEM &fd101_Dir_PumpSpeedProportion = 7000 // 70.00%
+REG &fd101_SlowPumpSpeedProportion = &USER_MEMORY_961
+MEM &fd101_SlowPumpSpeedProportion = 7000 // 70.00%
 
-REG &fd101_BW_PumpSpeedProportion = &USER_MEMORY_962
-MEM &fd101_BW_PumpSpeedProportion = 7000 // 70.00%
+// This value is calculated on-the-fly based on the above proportion 
+REG &fd101_SlowPumpSpeed = &USER_MEMORY_962
+MEM &fd101_SlowPumpSpeed = 0
 
 REG &fd101_PreviousPumpSpeed = &USER_MEMORY_963
 MEM &fd101_PreviousPumpSpeed = 0
+
+// User memory 964 to 967 used above

@@ -155,7 +155,7 @@ VV:
 
 
   // Fault checking: if the valve is being asked to go to one state, but it's 
-  // not in that state, check how long has this benn been going on.  If it's
+  // not in that state, check how long has this been been going on.  If it's
   // longer than the item's preset then this is a fault. 
   IF (|VVout = ON) THEN
     IF (|VVdelayedOut = ON) THEN

@@ -21,15 +21,15 @@ DIM fd100MsgArray[] = \
 "      Ready     ",\
 "               Press the green button to start               ",\
 "    Waiting     ",\
-"Filling Feedtank",\
+"Filling feedtank",\
 "     Mixing     ",\
 "  Recirculating ",\
 "  Concentrating ",\
 "Emptying to site",\
 "Pumping to waste",\
-"Draining to waste",\
-"Pumping to store",\
-"Draining to store"]
+"               Draining to waste               ",\
+"               Pumping to storage tank               ",\
+"               Draining to storage tank               "]
 
 REG &fd100StepTimeAcc = &AUX2
 MEM &fd100StepTimeAcc = 0
