@@ -1,0 +1,3 @@
+The original compiler has a bug that doesn't allow use of the program
+space above 95%.  This version of the compiler, which is just a
+drop-in replacement for the old one, solves this problem.
