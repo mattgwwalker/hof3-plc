@@ -2,9 +2,10 @@
 //PP03
 //
 
-if ((|fd100_PP03en1=ON)\
- AND (|fd100Fault_PP03pause = OFF)\
- AND (&fd100FillSource = fd100FillSource_TANK)) then
+if  |fd100_PP03en1=ON\
+and |fd100Fault_PP03pause = OFF\
+and &fd100FillSource = fd100FillSource_STORAGE_TANK\
+and &fd100StorageTankState = fd100TankState_NOT_EMPTY then
   |PP03autoOut = ON
 else
   |PP03autoOut = OFF

@@ -1,6 +1,8 @@
 //FD100 USER_MEMORY registers
 //** &USER_MEMORY_880 to &USER_MEMORY_929 currently allocated ** 
 
+// User memory 883 to 889 used below
+
 REG &fd100cmd = &USER_MEMORY_890
 MEM &fd100cmd = 0
 CONST fd100cmd_noAction = 0 //No Action
@@ -71,6 +73,11 @@ DIM fd100Faultcmd_resetMsgArray[] = \
 "22. Feed tank pH Too Low",\
 "23. Feed tank pH Too High",\
 "24. Pressure drop across the bag filter is too high",\
+"25. Storage tank is empty while trying to fill from storage tank",\
+"26. Feed tank's contents incompatible with adding product",\
+"27. Feed tank's contents incompatible with adding automatically-dosed chemical",\
+"28. Feed tank's contents incompatible with adding water",\
+"29. Feed tank's contents incompatible with storage tank's contents",\
 ""]
 
 REG &fd100ProgOut01 = &USER_MEMORY_905
@@ -190,25 +197,46 @@ BITREG &fd100FaultProgOut01 = [\
 
 
 REG &fd100FillSource = &USER_MEMORY_924
-CONST fd100FillSource_NONE = 0 //No fill source... manual fill required to operate
-CONST fd100FillSource_SITE = 1 //Fill Feedtank from Site
-CONST fd100FillSource_WATER = 2 //Fill Feedtank with water via CIP chemical line
-CONST fd100FillSource_CHEM = 3 //Fill Feedtank with water and CIP Chemical line
-CONST fd100FillSource_MANCHEM = 4 //Fill Feedtank with water and Manually Dosed CIP Chemical
-CONST fd100FillSource_TANK = 5 //Fill Feedtank from Storage Tank 
+CONST fd100FillSource_NONE = 0         // No fill source... manual fill required to operate
+CONST fd100FillSource_SITE = 1         // Fill feedtank from site
+CONST fd100FillSource_WATER = 2        // Fill feedtank with water via CIP chemical line
+CONST fd100FillSource_AUTO_CHEM = 3         // Fill feedtank with water and CIP Chemical line
+CONST fd100FillSource_STORAGE_TANK = 5 // Fill feedtank from storage tank 
 MEM &fd100FillSource = fd100FillSource_SITE
 
-REG &fd100Status = &USER_MEMORY_925
-CONST fd100Status_UNKNOWN = 0 //Unknown Plant State
-CONST fd100Status_PROD_FULL = 1 //Feed tank full of Product
-CONST fd100Status_PROD_MT = 2 //Feed tank empty of Product
-CONST fd100Status_RINSE_FULL = 3 //Feed tank full of Rinse Water
-CONST fd100Status_RINSE_MT = 4 //Feed tank empty of Rinse Water
-CONST fd100Status_CIP_FULL = 5 //Feed tank full of CIP Chem
-CONST fd100Status_CIP_MT = 6 //Feed tank empty of CIP Chem
-MEM &fd100Status = fd100Status_UNKNOWN
 
-//Fill Time 
+// These constants apply to the feed tank and to the storage tank
+CONST fd100TankContents_UNKNOWN   = 0  // Tank contents are unknown
+CONST fd100TankContents_CLEAN     = 1  // The tank is clean
+CONST fd100TankContents_PROD      = 2  // Tank contains product
+CONST fd100TankContents_RINSE     = 3  // Tank contains rinse water
+CONST fd100TankContents_AUTO_CHEM = 4  // Tank contains automatically-dosed CIP chemical
+CONST fd100TankContents_MAN_CHEM  = 5  // Tank contains manually-dosed CIP chemical
+CONST fd100TankContents_WATER     = 6 // Tank contains clean water
+
+CONST fd100TankState_UNKNOWN   = 0 // The tank state is unknown
+CONST fd100TankState_EMPTY     = 1 // The tank is empty
+CONST fd100TankState_NOT_EMPTY = 2 // The tank is not empty
+
+
+// Feed tank state and contents
+REG &fd100FeedTankState = &USER_MEMORY_925
+MEM &fd100FeedTankState = fd100TankState_UNKNOWN
+
+REG &fd100FeedTankContents = &USER_MEMORY_883
+MEM &fd100FeedTankContents = fd100TankContents_UNKNOWN
+
+
+// Storage tank state and contents
+REG &fd100StorageTankState = &USER_MEMORY_885
+MEM &fd100StorageTankState = fd100TankState_UNKNOWN
+
+REG &fd100StorageTankContents = &USER_MEMORY_884
+MEM &fd100StorageTankContents = fd100TankContents_UNKNOWN
+
+
+// Fill Time - maximum amount of time allowed for feed tank level to increase
+// by one percentage-point 
 REG &fd100StepTimePre_FILL_s10 = &USER_MEMORY_926
 MEM &fd100StepTimePre_FILL_s10 = 250 // 25 seconds
 REG &fd100StepTimePre_FILL_m = &USER_MEMORY_927
@@ -223,15 +251,15 @@ CONST fd100Temperature_COOL = 2 //Cool to Setpoint
 MEM &fd100Temperature = fd100Temperature_NONE
 
 
-// Logging frequency (timer-based)
-REG &fd100LogTimePre_s10 = &USER_MEMORY_888
-MEM &fd100LogTimePre_s10 = -10
-REG &fd100LogTimePre_m = &USER_MEMORY_889
-MEM &fd100LogTimePre_m = 0
-
 // Logging timer
 REG &fd100LogTimeAcc_s10 = &USER_MEMORY_886
 MEM &fd100LogTimeAcc_s10 = 0
 REG &fd100LogTimeAcc_m = &USER_MEMORY_887
 MEM &fd100LogTimeAcc_m = 0
+
+// Logging frequency (timer-based)
+REG &fd100LogTimePre_s10 = &USER_MEMORY_888
+MEM &fd100LogTimePre_s10 = -10
+REG &fd100LogTimePre_m = &USER_MEMORY_889
+MEM &fd100LogTimePre_m = 0
 

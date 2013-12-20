@@ -2,14 +2,16 @@
 //DV06
 //
 
-if (((|fd100_DV06en1=ON)\
- AND ((&fd100FillSource = fd100FillSource_WATER)\
- OR (&fd100FillSource = fd100FillSource_CHEM)\
- OR (&fd100FillSource = fd100FillSource_MANCHEM)))\
- OR (|fd102_DV06=ON)) then
-|DV06autoOut = ON
+if (|fd100_DV06en1=ON\
+    and (&fd100FillSource = fd100FillSource_WATER\
+         or &fd100FillSource = fd100FillSource_AUTO_CHEM))\
+or |fd102_DV06=ON then
+  // Either FD100 is asking for DV06 to be on and the fill source is one of
+  // water or auto-chem,
+  // Or FD102 is asking for it to be on
+  |DV06autoOut = ON
 else
-|DV06autoOut = OFF
+  |DV06autoOut = OFF
 endif
 
 |DV06eng = |DV06E_I

@@ -1,5 +1,5 @@
 // Check if the abort command has been issued
-checkForAbort:
+abortOnRequest:
   if (&fd100cmdOns=fd100cmd_ABORT) then
     // Log abort event
     &EventID = EventID_ABORTED

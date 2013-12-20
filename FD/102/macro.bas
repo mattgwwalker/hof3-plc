@@ -7,7 +7,7 @@
 select &tempStepNum
  case  fd102StepNum_RESET:
   if ((|fd100_fd102_chemdoseEn1 = ON)\
-   and (&fd100FillSource = fd100FillSource_CHEM)) then
+   and (&fd100FillSource = fd100FillSource_AUTO_CHEM)) then
     &tempStepNum = fd102StepNum_DOSECHEM
   endif
   
@@ -17,7 +17,7 @@ select &tempStepNum
    &tempStepNum = fd102StepNum_PURGE
   endif
   if ((|fd100_fd102_chemdoseEn1 = OFF)\
-   or (&fd100FillSource != fd100FillSource_CHEM)) then
+   or (&fd100FillSource != fd100FillSource_AUTO_CHEM)) then
     &tempStepNum = fd102StepNum_RESET
   endif
   
@@ -27,13 +27,13 @@ select &tempStepNum
    &tempStepNum = fd102StepNum_END
   endif
   if ((|fd100_fd102_chemdoseEn1 = OFF)\
-   or (&fd100FillSource != fd100FillSource_CHEM)) then
+   or (&fd100FillSource != fd100FillSource_AUTO_CHEM)) then
     &tempStepNum = fd102StepNum_RESET
   endif
  
  case  fd102StepNum_END:
   if ((|fd100_fd102_chemdoseEn1 = OFF)\
-   or (&fd100FillSource != fd100FillSource_CHEM)) then
+   or (&fd100FillSource != fd100FillSource_AUTO_CHEM)) then
     &tempStepNum = fd102StepNum_RESET
   endif    
         

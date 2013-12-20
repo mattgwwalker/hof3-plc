@@ -5,15 +5,13 @@
 if (((|fd102_IV10=ON) AND (|fd100Fault_fd102_Pause = OFF))\
  OR ((|fd100_IV10en1=ON)\
  AND ((&fd100FillSource = fd100FillSource_WATER)\
- OR (&fd100FillSource = fd100FillSource_CHEM)\
- OR (&fd100FillSource = fd100FillSource_MANCHEM))\
+ OR (&fd100FillSource = fd100FillSource_AUTO_CHEM))\
  AND (&LT01_100 < (&LT01SP01 - &LT01SP02))))  then
   |IV10autoOut = ON
 elsif (((|fd102_IV10=OFF) OR (|fd100Fault_fd102_Pause = ON))\
  AND ((|fd100_IV10en1=OFF)\
  OR ((&fd100FillSource != fd100FillSource_WATER)\
- AND (&fd100FillSource != fd100FillSource_CHEM)\
- AND (&fd100FillSource != fd100FillSource_MANCHEM))\
+ AND (&fd100FillSource != fd100FillSource_AUTO_CHEM))\
  OR (&LT01_100 > (&LT01SP01 + &LT01SP02)))) then
   |IV10autoOut = OFF
 endif
