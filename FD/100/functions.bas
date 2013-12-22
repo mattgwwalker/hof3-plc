@@ -7,7 +7,7 @@ abortOnRequest:
     &EventID = EventID_NONE
     
     // Return to the waiting-for-instruction state
-    &tempStepNum = fd100StepNum_WAITINS  
+    &tempStepNum = fd100StepNum_WAIT_INSTRUCTION  
   endif
   return
 

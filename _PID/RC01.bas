@@ -30,21 +30,21 @@ endif
 &V1x_last = (&V1 * (&R01_last - 1.0))
 
 IF (&R01 < 0.0) THEN
- &R01_1000 = 0 
+  &R01_1000 = 0 
 ELSIF (&R01 > 10.0) THEN
- &R01_1000 = 10000 
+  &R01_1000 = 10000 
 ELSE
- &R01_1000 = &R01 * 1000
+  &R01_1000 = &R01 * 1000
 ENDIF
 
 &RC01pv = &R01_1000
 
 if (|fd100_RC01pidEn1=ON) then
- if ((|fd100Fault_RC01pidHold=OFF) and (|fd101_RC01pidHold=OFF)) then 
-  |fd100_RC01pid=ON
- else
-  |fd100_RC01so=ON
- endif
+  if ((|fd100Fault_RC01pidHold=OFF) and (|fd101_RC01pidHold=OFF)) then 
+    |fd100_RC01pid=ON
+  else
+    |fd100_RC01so=ON
+  endif
 endif
 
 |RC01progOutModePID = |fd100_RC01pid 

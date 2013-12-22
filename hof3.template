@@ -75,7 +75,7 @@ INCLUDE "{ROOT}\FS01_USER_MEMORY.bas" //845 - 845
 INCLUDE "{ROOT}\AI\FT03_USER_MEMORY.bas" //846 - 847
 INCLUDE "{ROOT}\AI\FT02_USER_MEMORY.bas" //848 - 849
 
-INCLUDE "{ROOT}\fd\100\_USER_MEMORY.bas"  //890-929
+INCLUDE "{ROOT}\fd\100\_USER_MEMORY.bas"  //870-929
 INCLUDE "{ROOT}\fd\101\_USER_MEMORY.bas"  //930-969
 INCLUDE "{ROOT}\fd\102\_USER_MEMORY.bas"  //990-999
 
@@ -94,14 +94,17 @@ INCLUDE "{ROOT}\FD\101\functions.bas"
 //****************************************************************** MAIN MACRO
 main_macro:
 //Get the time since the start of the last main macro scan
- &lastScanTimeFast = &FAST_TIMER1 
- &FAST_TIMER1 = &FAST_TIMER1 - &lastScanTimeFast
+&lastScanTimeFast = &FAST_TIMER1 
+&FAST_TIMER1 = &FAST_TIMER1 - &lastScanTimeFast
  
- &lastScanTimeShort = &SHORT_TIMER1
- &SHORT_TIMER1 = &SHORT_TIMER1 - &lastScanTimeShort
+&lastScanTimeShort = &SHORT_TIMER1
+&SHORT_TIMER1 = &SHORT_TIMER1 - &lastScanTimeShort
  
 // Pre-processing of FS01's raw input
 INCLUDE "{ROOT}\FS01.bas" 
+
+// Check of level to set feed tank's state
+INCLUDE "{ROOT}\AI\LT01.bas"
 
 // Calculation of pressure drop across the bag filter
 INCLUDE "{ROOT}\AI\DPT02.bas" 

@@ -1,38 +1,55 @@
 //FD100 USER_MEMORY registers
-//** &USER_MEMORY_880 to &USER_MEMORY_929 currently allocated ** 
+//** &USER_MEMORY_870 to &USER_MEMORY_929 currently allocated ** 
 
-// User memory 883 to 889 used below
+// User memory 876 to 889 used below
 
 REG &fd100cmd = &USER_MEMORY_890
 MEM &fd100cmd = 0
-CONST fd100cmd_noAction = 0 //No Action
-CONST fd100cmd_ACK = 1 //Acknowledge End State
-CONST fd100cmd_PB = 2 //Pushbutton Required
-CONST fd100cmd_stop = 3 //Stop
-CONST fd100cmd_RECIRC = 4 //Recirc
-CONST fd100cmd_PAUSE = 5 //Pause ... i.e. simulate PB01 action
-CONST fd100cmd_ABORT = 6 //Abort current sequence
-CONST fd100cmd_DRAIN = 7 //Feedtank To Drain
-CONST fd100cmd_STORE = 8 //Feedtank To Storage Tank
+CONST fd100cmd_NONE  = 0 // No Action
+CONST fd100cmd_ACK   = 1 // Acknowledge End State
+CONST fd100cmd_AWAIT_PUSH_BUTTON = 2 // Pushbutton Required
+CONST fd100cmd_STOP  = 3 // Stop
+CONST fd100cmd_RUN   = 4 // Mixing, recirculating, concentrating, and then concentrating to empty
+CONST fd100cmd_PAUSE = 5 // Pause ... i.e. simulate PB01 action
+CONST fd100cmd_ABORT = 6 // Abort current sequence
+CONST fd100cmd_WASTE = 7 // Send feed tank to waste
+CONST fd100cmd_STORE = 8 // Send feed tank to storage tank
+CONST fd100cmd_STORE_TO_WASTE = 9 // Storage tank to waste
 
 
 REG &fd100cmdOns = &USER_MEMORY_891
 MEM &fd100cmdOns = 0
 
-REG &fd100cmd_prod_msg = &USER_MEMORY_892
-MEM &fd100cmd_prod_msg = 0
 
-REG &fd100cmd_cip_msg = &USER_MEMORY_893
-MEM &fd100cmd_cip_msg = 0
+// Pre-selection messages for the 'run' command for the five different fill
+// sources (none, site, auto chem, water, storage tank)
+REG &fd100cmd_run_none_msg = &USER_MEMORY_882
+MEM &fd100cmd_run_none_msg = 0
 
-REG &fd100cmd_rinse_msg = &USER_MEMORY_894
-MEM &fd100cmd_rinse_msg = 0
+REG &fd100cmd_run_site_msg = &USER_MEMORY_892
+MEM &fd100cmd_run_site_msg = 0
 
-REG &fd100cmd_DRAIN_msg = &USER_MEMORY_895
-MEM &fd100cmd_DRAIN_msg = 0
+REG &fd100cmd_run_auto_chem_msg = &USER_MEMORY_893
+MEM &fd100cmd_run_auto_chem_msg = 0
 
-REG &fd100cmd_STORE_msg = &USER_MEMORY_896
-MEM &fd100cmd_STORE_msg = 0
+REG &fd100cmd_run_water_msg = &USER_MEMORY_894
+MEM &fd100cmd_run_water_msg = 0
+
+REG &fd100cmd_run_store_msg = &USER_MEMORY_881
+MEM &fd100cmd_run_store_msg = 0
+
+// Pre-selection message for the 'send to waste' command 
+REG &fd100cmd_waste_msg = &USER_MEMORY_895
+MEM &fd100cmd_waste_msg = 0
+
+// Pre-selection message for the 'send to storage tank' command
+REG &fd100cmd_store_msg = &USER_MEMORY_896
+MEM &fd100cmd_store_msg = 0
+
+// Pre-selection message for the 'send storage tank to waste' command
+REG &fd100cmd_store_to_waste_msg = &USER_MEMORY_880
+MEM &fd100cmd_store_to_waste_msg = 0
+
 
 REG &fd100Faultcmd = &USER_MEMORY_902
 MEM &fd100Faultcmd = 0
@@ -47,38 +64,39 @@ MEM &fd100FaultcmdOns = 0
 REG &fd100Faultcmd_resetMsg = &USER_MEMORY_904
 MEM &fd100Faultcmd_resetMsg = 0
 
-DIM fd100Faultcmd_resetMsgArray[] = \
-[" ",\
-"1. Main Feed Pump Fault",\
-"2. Pause Pushbutton Activated",\
-"3. Estop Activated",\
-"4. No Water Pressure",\
-"5. No High Pressure Air",\
-"6. No Low Pressure Air",\
-"7. No Main Feed Pump Seal Water",\
-"8. Feed tank full of Product",\
-"9. Feed tank empty of Product",\
-"10. Feed tank full of Rinse Water",\
-"11. Feed tank empty of Rinse Water",\
-"12. Feed tank full of CIP Chem",\
-"13. Feed tank empty of CIP Chem",\
-"14. Pause Selection Activated",\
-"15. Feed tank Fill Max Time Expired",\
-"16. Feed tank Temperature Too Low",\
-"17. Feed tank Temperature Too High",\
-"18. Inlet Pressure High",\
-"19. Transmembrane Pressure High",\
-"20. Back Pressure High",\
-"21. Along Membrane Pressure High",\
-"22. Feed tank pH Too Low",\
-"23. Feed tank pH Too High",\
-"24. Pressure drop across the bag filter is too high",\
-"25. Storage tank is empty while trying to fill from storage tank",\
-"26. Feed tank's contents incompatible with adding product",\
-"27. Feed tank's contents incompatible with adding automatically-dosed chemical",\
-"28. Feed tank's contents incompatible with adding water",\
-"29. Feed tank's contents incompatible with storage tank's contents",\
-""]
+//DIM fd100Faultcmd_resetMsgArray[] = \
+//[" ",\
+//"1. Main Feed Pump Fault",\
+//"2. Pause Pushbutton Activated",\
+//"3. Estop Activated",\
+//"4. No Water Pressure",\
+//"5. No High Pressure Air",\
+//"6. No Low Pressure Air",\
+//"7. No Main Feed Pump Seal Water",\
+//"8. Feed tank full of Product",\
+//"9. Feed tank empty of Product",\
+//"10. Feed tank full of Rinse Water",\
+//"11. Feed tank empty of Rinse Water",\
+//"12. Feed tank full of CIP Chem",\
+//"13. Feed tank empty of CIP Chem",\
+//"14. Pause Selection Activated",\
+//"15. Feed tank Fill Max Time Expired",\
+//"16. Feed tank Temperature Too Low",\
+//"17. Feed tank Temperature Too High",\
+//"18. Inlet Pressure High",\
+//"19. Transmembrane Pressure High",\
+//"20. Back Pressure High",\
+//"21. Along Membrane Pressure High",\
+//"22. Feed tank pH Too Low",\
+//"23. Feed tank pH Too High",\
+//"24. Pressure drop across the bag filter is too high",\
+//"25. Storage tank is empty while trying to fill from storage tank",\
+//"26. Feed tank's contents incompatible with adding product",\
+//"27. Feed tank's contents incompatible with adding automatically-dosed chemical",\
+//"28. Feed tank's contents incompatible with adding water",\
+//"29. Feed tank's contents incompatible with storage tank's contents",\
+//"30. Feed tank is empty and fill source is set to None",\
+//""]
 
 REG &fd100ProgOut01 = &USER_MEMORY_905
 BITREG &fd100ProgOut01 = [\
@@ -93,6 +111,7 @@ BITREG &fd100ProgOut01 = [\
 |fd100_IV08en1,\
 |fd100_IV10en1,\
 |fd100_IV15,\
+|fd100_IV16,\
 |fd100_PP01,\
 |fd100_PP03en1,\
 |fd100Temperatureen1,\
@@ -149,23 +168,35 @@ MEM &fd100StepTimePre_RECIRC_s10 = 300
 REG &fd100StepTimePre_RECIRC_m = &USER_MEMORY_915
 MEM &fd100StepTimePre_RECIRC_m = 0
 
+// Time for blasting of retentate line (during recirc) 
+REG &fd100StepTimePre_Recirc_BlastRetentate_s10 = &USER_MEMORY_878
+MEM &fd100StepTimePre_Recirc_BlastRetentate_s10 = 0
+REG &fd100StepTimePre_Recirc_BlastRetentate_m = &USER_MEMORY_879
+MEM &fd100StepTimePre_Recirc_BlastRetentate_m = -10
+
+// Time for blasting of permeate line (during recirc) 
+REG &fd100StepTimePre_Recirc_BlastPermeate_s10 = &USER_MEMORY_876
+MEM &fd100StepTimePre_Recirc_BlastPermeate_s10 = 0
+REG &fd100StepTimePre_Recirc_BlastPermeate_m = &USER_MEMORY_877
+MEM &fd100StepTimePre_Recirc_BlastPermeate_m = -10
+
 //Time for Step DRAIN 
 REG &fd100StepTimePre_DRAIN_s10 = &USER_MEMORY_916
 MEM &fd100StepTimePre_DRAIN_s10 = 150
 REG &fd100StepTimePre_DRAIN_m = &USER_MEMORY_917
 MEM &fd100StepTimePre_DRAIN_m = 0
 
-//RECIRC Timer
-REG &fd100TimeAcc_RECIRC_s10 = &USER_MEMORY_918
-MEM &fd100TimeAcc_RECIRC_s10 = 0
-REG &fd100TimeAcc_RECIRC_m = &USER_MEMORY_919
-MEM &fd100TimeAcc_RECIRC_m = 0
+// Membrane-use Timer
+REG &fd100TimeAcc_MembraneUse_s10 = &USER_MEMORY_918
+MEM &fd100TimeAcc_MembraneUse_s10 = 0
+REG &fd100TimeAcc_MembraneUse_m = &USER_MEMORY_919
+MEM &fd100TimeAcc_MembraneUse_m = 0
 
-//RECIRC Time
-REG &fd100TimePre_RECIRC_s10 = &USER_MEMORY_920
-MEM &fd100TimePre_RECIRC_s10 = 0
-REG &fd100TimePre_RECIRC_m = &USER_MEMORY_921
-MEM &fd100TimePre_RECIRC_m = 60
+// Membrane-use Time
+REG &fd100TimePre_MembraneUse_s10 = &USER_MEMORY_920
+MEM &fd100TimePre_MembraneUse_s10 = 0
+REG &fd100TimePre_MembraneUse_m = &USER_MEMORY_921
+MEM &fd100TimePre_MembraneUse_m = 60
 
 
 

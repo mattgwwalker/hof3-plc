@@ -3,18 +3,20 @@ MEM &fd100StepNum = 0
 MEM &AUX1_TEXT = "FD100_SN"
 MEM &DISPLAY_FORMAT_AUX1 = 0
 CONST fd100StepNum_RESET = 0
-CONST fd100StepNum_WAITINS = 1
-CONST fd100StepNum_PB = 2
+CONST fd100StepNum_WAIT_INSTRUCTION = 1
+CONST fd100StepNum_WAIT_PUSH_BUTTON = 2
 CONST fd100StepNum_END = 3
 CONST fd100StepNum_FILL = 4
 CONST fd100StepNum_MIX = 5
 CONST fd100StepNum_RECIRC = 6
-CONST fd100StepNum_CONC = 7
-CONST fd100StepNum_MT2SITE = 8
-CONST fd100StepNum_MT2WASTE = 9
-CONST fd100StepNum_DRAIN2WASTE = 10
-CONST fd100StepNum_MT2STORE = 11
-CONST fd100StepNum_DRAIN2STORE = 12
+CONST fd100StepNum_BLAST = 7
+CONST fd100StepNum_CONC = 8
+CONST fd100StepNum_CONC_TILL_EMPTY = 9
+CONST fd100StepNum_PUMP_TO_WASTE = 10
+CONST fd100StepNum_DRAIN_TO_WASTE = 11
+CONST fd100StepNum_PUMP_TO_STORE = 12
+CONST fd100StepNum_DRAIN_TO_STORE = 13
+CONST fd100StepNum_DRAIN_STORE_TO_WASTE = 14
 
 DIM fd100MsgArray[] = \
 ["     Reset     ",\
@@ -29,7 +31,8 @@ DIM fd100MsgArray[] = \
 "Pumping to waste",\
 "               Draining to waste               ",\
 "               Pumping to storage tank               ",\
-"               Draining to storage tank               "]
+"               Draining to storage tank               ",\
+"               Draining storage tank to waste               "]
 
 REG &fd100StepTimeAcc = &AUX2
 MEM &fd100StepTimeAcc = 0

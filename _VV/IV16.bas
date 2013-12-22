@@ -2,6 +2,12 @@
 //IV16
 //
 
+if |fd100_IV16 = ON then
+  |IV16autoOut = ON
+else
+  |IV16autoOut = OFF
+endif
+
 |IV16eng = |IV16E_I
 |IV16deeng = |IV16D_I
 |IV16manEnable = ON
