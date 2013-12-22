@@ -1369,8 +1369,13 @@ if (|fd100Fault_msg1 = ON) then
         // Whatever we're doing at this point, it's not ok 
         &OPmsg = 29
       endif
-    endif                
-  ENDIF
+    endif
+    
+  elsif |fd102_fd100_faultDosingChem = ON then
+    // There's been a fault while dosing chemical
+    &OPmsg = 31
+                    
+  endif
 
 endif
 

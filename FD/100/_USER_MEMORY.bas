@@ -96,6 +96,7 @@ MEM &fd100Faultcmd_resetMsg = 0
 //"28. Feed tank's contents incompatible with adding water",\
 //"29. Feed tank's contents incompatible with storage tank's contents",\
 //"30. Feed tank is empty and fill source is set to None",\
+//"31. Fault while automatically dosing chemical",\
 //""]
 
 REG &fd100ProgOut01 = &USER_MEMORY_905
