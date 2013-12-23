@@ -17,6 +17,7 @@ CONST fd100StepNum_DRAIN_TO_WASTE = 11
 CONST fd100StepNum_PUMP_TO_STORE = 12
 CONST fd100StepNum_DRAIN_TO_STORE = 13
 CONST fd100StepNum_DRAIN_STORE_TO_WASTE = 14
+CONST fd100StepNum_PRE_END = 15
 
 DIM fd100MsgArray[] = \
 ["     Reset     ",\
@@ -32,7 +33,8 @@ DIM fd100MsgArray[] = \
 "               Draining to waste               ",\
 "               Pumping to storage tank               ",\
 "               Draining to storage tank               ",\
-"               Draining storage tank to waste               "]
+"               Draining storage tank to waste               ",\
+"               Washing chemical line               "]
 
 REG &fd100StepTimeAcc = &AUX2
 MEM &fd100StepTimeAcc = 0

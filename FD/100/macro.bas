@@ -394,16 +394,16 @@ select &tempStepNum
  
   
   case fd100StepNum_END: //Wait for ACK from RPi
-    //If Ack Command from RPi then go back to waiting for new instruction  
+    // If Ack Command from RPi then go back to waiting for new instruction  
     IF (&fd100cmdOns=fd100cmd_ACK) THEN
       &tempStepNum = fd100StepNum_WAIT_INSTRUCTION 
     ENDIF
-    //If Stop Command from RPi then go back to waiting for new instruction  
+    // If Stop Command from RPi then go back to waiting for new instruction  
     IF (&fd100cmdOns=fd100cmd_STOP) THEN
       gosub logStopEvent
       &tempStepNum = fd100StepNum_WAIT_INSTRUCTION 
     ENDIF
-    //If Abort Command from RPi then go back to waiting for new instruction  
+    // If Abort Command from RPi then go back to waiting for new instruction  
     gosub abortOnRequest
 
 
@@ -456,7 +456,7 @@ select &tempStepNum
     // Stop Production or CIP Chemical Wash  
     IF (&fd100cmdOns=fd100cmd_STOP) THEN
       gosub logStopEvent
-      &tempStepNum = fd100StepNum_END 
+      &tempStepNum = fd100StepNum_PRE_END 
     ENDIF
     gosub abortOnRequest
 
@@ -472,9 +472,9 @@ select &tempStepNum
     ENDIF
 
     // Stop Recirculation and return to Mix if dosing Chemical. 
-    IF (|fd102_fd100_dosingChem=ON) THEN
-      &tempStepNum = fd100StepNum_MIX 
-    ENDIF
+    //IF (|fd102_fd100_dosingChem=ON) THEN
+    //  &tempStepNum = fd100StepNum_MIX 
+    //ENDIF
 
     // Recirculation time before concentrating through membrane
     // Set _s10 to a negative value to stay in this state.
@@ -490,12 +490,12 @@ select &tempStepNum
     IF ((&fd100TimeAcc_MembraneUse_m >= &fd100TimePre_MembraneUse_m)\
     AND (&fd100TimeAcc_MembraneUse_s10 >= &fd100TimePre_MembraneUse_s10)\
     AND (&fd100TimePre_MembraneUse_s10 >= 0)) THEN
-      &tempStepNum = fd100StepNum_END  
+      &tempStepNum = fd100StepNum_PRE_END  
     ENDIF  
 
     // Check if we've been asked to stop  
     IF (&fd100cmdOns=fd100cmd_STOP) THEN
-      &tempStepNum = fd100StepNum_END 
+      &tempStepNum = fd100StepNum_PRE_END 
     ENDIF
     
     // Check if we've been asked to abort
@@ -533,7 +533,7 @@ select &tempStepNum
   case fd100StepNum_CONC_TILL_EMPTY: //Production - Empty Feedtank To Site
     //Feed Tank Reached Min Level. 
     IF (&LT01_100 < &LT01SP05) THEN
-      &tempStepNum = fd100StepNum_END
+      &tempStepNum = fd100StepNum_PRE_END
     ENDIF
     gosub abortOnRequest
     
@@ -613,6 +613,13 @@ select &tempStepNum
 
     gosub abortOnRequest
 
+
+  // Wait for chemical line to be washed (FD102)
+  case fd100StepNum_PRE_END:
+    if |fd102_fd100_dosingChem = OFF then
+      &tempStepNum = fd100StepNum_END 
+    endif
+    
 
   default:
     &tempStepNum = fd100StepNum_RESET
@@ -850,7 +857,8 @@ IF (&tempStepNum != &fd100StepNum) THEN
       // Change feed tank status to empty
       &fd100StorageTankState = fd100TankState_EMPTY
     
-
+    case fd100StepNum_PRE_END:
+      // Do nothing
          
     default:
 
@@ -1101,6 +1109,10 @@ select &tempStepNum
     |fd100_IL01 = ON        // PB01 LED Light
     |fd100_IV16 = ON        // Allow storage tank to drain
 
+
+  // Wait for washing of chemical line (FD102) to finish
+  case fd100StepNum_PRE_END:
+    // Do nothing!
      
   default:
 

@@ -43,7 +43,7 @@ select &tempStepNum
     // Check if we've effectively been asked to stop
     if ((|fd100_fd102_chemdoseEn1 = OFF)\
     or (&fd100FillSource != fd100FillSource_AUTO_CHEM)) then
-      &tempStepNum = fd102StepNum_RESET
+      &tempStepNum = fd102StepNum_WASH
     endif
   
 
@@ -57,7 +57,7 @@ select &tempStepNum
     // Check if we've effectively been asked to stop
     if ((|fd100_fd102_chemdoseEn1 = OFF)\
     or (&fd100FillSource != fd100FillSource_AUTO_CHEM)) then
-      &tempStepNum = fd102StepNum_RESET
+      &tempStepNum = fd102StepNum_WASH
     endif
   
 
@@ -68,7 +68,15 @@ select &tempStepNum
     endif
     if ((|fd100_fd102_chemdoseEn1 = OFF)\
     or (&fd100FillSource != fd100FillSource_AUTO_CHEM)) then
-      &tempStepNum = fd102StepNum_RESET
+      &tempStepNum = fd102StepNum_WASH
+    endif
+
+
+  case  fd102StepNum_WASH:
+    // If we've spent enough time washing, go to End
+    if ((&fd102StepTimeAcc_m >= &fd102StepTimePre_WASH_m) \
+    and (&fd102StepTimeAcc_s10 >= &fd102StepTimePre_WASH_s10)) then
+      &tempStepNum = fd102StepNum_END
     endif
 
 
@@ -101,6 +109,8 @@ IF (&tempStepNum != &fd102StepNum) THEN
   
     case  fd102StepNum_PURGE:
  
+    case  fd102StepNum_WASH:
+
     case  fd102StepNum_END:         
   
     default:
@@ -140,6 +150,16 @@ select &tempStepNum
       &fd102StepTimeAcc_s10 = &fd102StepTimeAcc_s10 + &lastScanTimeShort
     endif
 
+    |fd102_DV06=ON
+    |fd102_IV10=ON
+    |fd102_fd100_dosingChem=ON
+
+
+  case  fd102StepNum_WASH:
+    // Increment step timer if we're not paused
+    if (|fd100Fault_fd102_Pause=OFF) then
+      &fd102StepTimeAcc_s10 = &fd102StepTimeAcc_s10 + &lastScanTimeShort
+    endif
     |fd102_DV06=ON
     |fd102_IV10=ON
     |fd102_fd100_dosingChem=ON
