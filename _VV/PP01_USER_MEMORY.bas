@@ -21,3 +21,6 @@ REG &PP01faultTimerEngPre = &USER_MEMORY_608
 MEM &PP01faultTimerEngPre = 1500 
 REG &PP01faultTimerDeengPre = &USER_MEMORY_609
 MEM &PP01faultTimerDeengPre = 1500
+
+// PP01_RawSpeed is defined in USER_MEMORY_0xx.bas
+

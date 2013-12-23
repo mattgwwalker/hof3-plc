@@ -1,7 +1,7 @@
 //Analog Out Setup
 
 //PP01speed,PC01CV
-MEM &DATA_SOURCE_ANALOG1 = ADDR(&PC01cv)
+MEM &DATA_SOURCE_ANALOG1 = ADDR(&PP01_RawSpeed)
 MEM &D2A_AOP1_FULL_SCALE = 10000 //Default Value
 MEM &D2A_AOP1_ZERO = 0 //Default Value
 

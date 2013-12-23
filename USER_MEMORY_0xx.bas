@@ -10,6 +10,17 @@ REG &DPT01fault1Sp = &USER_MEMORY_5 //Value
 REG &DPT01fault1Time = &USER_MEMORY_6 //Time (s x 100)
 
 
+
+// PP01 Maximum rate of change (percentage points per second)
+REG &PP01_MaxDeltaSpeed = &USER_MEMORY_94
+MEM &PP01_MaxDeltaSpeed = 2000 // 20 percentage points per second
+
+
+// PP01 Pump speed indirection
+REG &PP01_RawSpeed = &USER_MEMORY_95
+MEM &PP01_RawSpeed = 0
+
+
 // Debug register
 REG &Debug = &USER_MEMORY_96
 

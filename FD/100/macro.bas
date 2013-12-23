@@ -51,6 +51,10 @@ if &fd100StepNum != fd100StepNum_WAIT_INSTRUCTION then
 endif
 
 
+// ***********
+// Push-button
+// ***********
+
 // Check if the push button PB01 has been pressed for two sequential scans
 IF (|PB01_I = ON) THEN
   IF (|PB01_1 = OFF) THEN

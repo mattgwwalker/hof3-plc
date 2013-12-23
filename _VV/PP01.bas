@@ -2,8 +2,33 @@
 //PP01 - Main Feed Pump
 //
 
+// Pump speed ramping
+// We take the current pump speed (assumed to be equal to the raw speed variable)
+// and, applying a maximum rate of change, we move it in the desired direction.
+if &PC01cv > &PP01_RawSpeed then
+  // We want to increase the pump's speed
+  // The 100.0 is to convert the scan time (in units of 0.01 seconds) to seconds 
+  if &PC01cv - &PP01_RawSpeed > &PP01_MaxDeltaSpeed * (&lastScanTimeFast / 100.0) then
+    // Difference is too great to make in one change
+    &PP01_RawSpeed = &PP01_RawSpeed + (&PP01_MaxDeltaSpeed * (&lastScanTimeFast / 100.0))
+  else
+    &PP01_RawSpeed = &PC01cv 
+  endif
+else
+  // We want to decrease the pump's speed (or keep it constant)
+  // The 100.0 is to convert the scan time (in units of 0.01 seconds) to seconds 
+  if &PP01_RawSpeed - &PC01cv > &PP01_MaxDeltaSpeed * (&lastScanTimeFast / 100.0) then
+    // Difference is too great to make in one change
+    &PP01_RawSpeed = &PP01_RawSpeed - (&PP01_MaxDeltaSpeed * (&lastScanTimeFast / 100.0))
+  else
+    &PP01_RawSpeed = &PC01cv 
+  endif
+endif
+
+
+
 if ((|fd100_PP01=ON)\
- and (|fd100Fault_PP01pause = OFF))  then
+and (|fd100Fault_PP01pause = OFF))  then
   |PP01autoOut = ON
 else
   |PP01autoOut = OFF
@@ -43,3 +68,11 @@ ENDIF
 |PP01_O1 = |PP01out
 |PP01_O2 = ON //............... Power removed to motor??
 
+
+
+
+// If the pump is off (either manually or automatically), set the raw speed
+// to zero
+if |PP01out = OFF
+  &PP01_RawSpeed = 0
+endif
