@@ -171,15 +171,15 @@ MEM &fd100StepTimePre_RECIRC_m = 0
 
 // Time for blasting of retentate line (during recirc) 
 REG &fd100StepTimePre_Recirc_BlastRetentate_s10 = &USER_MEMORY_878
-MEM &fd100StepTimePre_Recirc_BlastRetentate_s10 = 0
+MEM &fd100StepTimePre_Recirc_BlastRetentate_s10 = -10
 REG &fd100StepTimePre_Recirc_BlastRetentate_m = &USER_MEMORY_879
-MEM &fd100StepTimePre_Recirc_BlastRetentate_m = -10
+MEM &fd100StepTimePre_Recirc_BlastRetentate_m = 0
 
 // Time for blasting of permeate line (during recirc) 
 REG &fd100StepTimePre_Recirc_BlastPermeate_s10 = &USER_MEMORY_876
-MEM &fd100StepTimePre_Recirc_BlastPermeate_s10 = 0
+MEM &fd100StepTimePre_Recirc_BlastPermeate_s10 = -10
 REG &fd100StepTimePre_Recirc_BlastPermeate_m = &USER_MEMORY_877
-MEM &fd100StepTimePre_Recirc_BlastPermeate_m = -10
+MEM &fd100StepTimePre_Recirc_BlastPermeate_m = 0
 
 //Time for Step DRAIN 
 REG &fd100StepTimePre_DRAIN_s10 = &USER_MEMORY_916

@@ -97,7 +97,7 @@ select &tempStepNum
    &DATA_SOURCE_DISPLAY2 = ADDR(&Display_2DP)
 
   case  5: // LT01
-   IF &LT01_100 > 300 THEN
+   IF &LT01_100 > LT01_MIN_DETECTABLE_LEVEL THEN
      WRITE 1 ""
      WRITE 1 "LT01 (%)"
      &Display_2DP = &LT01_100

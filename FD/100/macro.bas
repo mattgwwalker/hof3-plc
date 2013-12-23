@@ -66,9 +66,9 @@ ELSE
 ENDIF
 
 
-// *****************************
-// Fault checking for selections
-// *****************************
+// ****************************
+// Pre-selection fault checking
+// ****************************
 
 // If fault checking is disabled, then set the selection messages to 0, meaning
 // there is no fault detected.
@@ -502,39 +502,6 @@ select &tempStepNum
     gosub abortOnRequest
 
 
-//  // Optionally used in cleaning to clear out the retentate and permeate lines 
-//  // (blasting them clean by opening the isolation valves and the control valves)
-//  case fd100StepNum_BLAST:  
-//    // Stop if level drops too low. 
-//    IF (&LT01_100 < (&LT01SP03 - &LT01SP04)) THEN
-//      &tempStepNum = fd100StepNum_FILL 
-//    ENDIF
-//
-//    // Blast duration, set to zero to skip this state entirely.  Set to a 
-//    // negative value to stay in this step until the membrane-use timer expires
-//    IF ((&fd100StepTimeAcc_m >= &fd100StepTimePre_BLAST_m)\
-//    AND (&fd100StepTimeAcc_s10 >= &fd100StepTimePre_BLAST_s10)\
-//    AND (&fd100StepTimePre_BLAST_s10 >= 0)) THEN
-//      &tempStepNum = fd100StepNum_CONC  
-//    ENDIF
-//
-//    // Total membrane-use time before stopping
-//    // Set _s10 to a negative value to ignore
-//    IF ((&fd100TimeAcc_MembraneUse_m >= &fd100TimePre_MembraneUse_m)\
-//    AND (&fd100TimeAcc_MembraneUse_s10 >= &fd100TimePre_MembraneUse_s10)\
-//    AND (&fd100TimePre_MembraneUse_s10 >= 0)) THEN
-//      &tempStepNum = fd100StepNum_END  
-//    ENDIF  
-//
-//    // Check if we've been asked to stop  
-//    IF (&fd100cmdOns=fd100cmd_STOP) THEN
-//      &tempStepNum = fd100StepNum_END 
-//    ENDIF
-//
-//    // Check if we've been asked to abort
-//    gosub abortOnRequest
-
-
   
   // Concentrate state.  The permeate and retentate lines no longer return to
   // the feed tank.
@@ -769,16 +736,7 @@ IF (&tempStepNum != &fd100StepNum) THEN
       &PC05spRampTarget  = &PC05sp01
       &PC03spRampTarget  = &PC03sp01 // Backwash target pressure 
       &PC03cv            = &PC03cv01 // Backwash's starting position
-    
-
-//    case fd100StepNum_BLAST:
-//      // Log the fact that Blast's started
-//      &EventID = EventID_BLAST_STARTED
-//      force_log
-//      &EventID = EventID_NONE
       
-
-
 
     case fd100StepNum_CONC: //Production - Concentrate
       // Log the fact that recirc's started
@@ -811,9 +769,6 @@ IF (&tempStepNum != &fd100StepNum) THEN
       &EventID = EventID_DRAIN2WASTE_STARTED
       force_log
       &EventID = EventID_NONE
-
-      // Change feed tank status to empty
-      &fd100FeedTankState = fd100TankState_EMPTY
 
 
 
@@ -884,8 +839,6 @@ IF (&tempStepNum != &fd100StepNum) THEN
       force_log
       &EventID = EventID_NONE
 
-      // Change feed tank status to empty
-      &fd100FeedTankState = fd100TankState_EMPTY
 
 
     case fd100StepNum_DRAIN_STORE_TO_WASTE:
@@ -968,13 +921,9 @@ select &tempStepNum
  
 
   case fd100StepNum_MIX: //Production or CIP Chemical Wash - Mix Via Bypass Line
+    // Increment step timer if we're not paused
     if (|fd100Fault_fd100_Pause=OFF) then
-      if (&fd100StepTimePre_MIX_s10 >= 0) then // Set to a negative value to disable 
-        &fd100StepTimeAcc_s10 = &fd100StepTimeAcc_s10 + &lastScanTimeShort
-      else
-        &fd100StepTimeAcc_s10 = 0
-        &fd100StepTimeAcc_m = 0
-      endif 
+      &fd100StepTimeAcc_s10 = &fd100StepTimeAcc_s10 + &lastScanTimeShort
     endif 
     |fd100_fd100Fault_enable1 = ON
     |fd100_DV06en1 = ON        // Energise if Fill Source is WATER  
@@ -991,19 +940,10 @@ select &tempStepNum
 
 
   case fd100StepNum_RECIRC: //Production or CIP Chemical Wash - Recirc through filter
+    // Increment step timer and membrane-use timer, if we're not paused
     if (|fd100Fault_fd100_Pause=OFF) then
-      if (&fd100StepTimePre_RECIRC_s10 >= 0) then
-        &fd100StepTimeAcc_s10 = &fd100StepTimeAcc_s10 + &lastScanTimeShort
-      else
-        &fd100StepTimeAcc_s10 = 0
-        &fd100StepTimeAcc_m = 0
-      endif
-      if (&fd100TimePre_MembraneUse_s10  >= 0) then
-        &fd100TimeAcc_MembraneUse_s10 = &fd100TimeAcc_MembraneUse_s10 + &lastScanTimeShort
-      else
-        &fd100TimeAcc_MembraneUse_s10 = 0
-        &fd100TimeAcc_MembraneUse_m = 0
-      endif
+      &fd100StepTimeAcc_s10 = &fd100StepTimeAcc_s10 + &lastScanTimeShort
+      &fd100TimeAcc_MembraneUse_s10 = &fd100TimeAcc_MembraneUse_s10 + &lastScanTimeShort
     endif 
     |fd100_fd100Fault_enable1 = ON
     |fd100_DV06en1 = ON           // Energise If Fill Source is WATER  
@@ -1025,9 +965,9 @@ select &tempStepNum
     and &fd100StepTimeAcc_s10 >= &fd100StepTimePre_Recirc_BlastRetentate_s10\
     and &fd100StepTimePre_Recirc_BlastRetentate_s10 >= 0 then
       // It's time to blast the retentate-bleed line
-      //|fd100_IV07 = ON   // Open the retentate-bleed isolation valve
-      //|fd100_RC01so = ON // Set the concentration-ratio controller to set-output
-      //&RC01cv = 10000    // and set the output to 100% fully-open        
+      |fd100_IV07 = ON   // Open the retentate-bleed isolation valve
+      |fd100_RC01so = ON // Set the concentration-ratio controller to set-output
+      &RC01cv = 10000    // and set the output to 100% fully-open        
     endif
 
     // Check if it's time to blast the permeate line
@@ -1035,46 +975,8 @@ select &tempStepNum
     and &fd100StepTimeAcc_s10 >= &fd100StepTimePre_Recirc_BlastPermeate_s10\
     and &fd100StepTimePre_Recirc_BlastPermeate_s10 >= 0 then
       // It's time to blast the permeate line
-      //|fd100_DV04 = ON   // Open the retentate-bleed isolation valve
+      |fd100_DV04 = ON   // Open the retentate-bleed isolation valve
     endif
-
-
-
-//  case fd100StepNum_BLAST:
-//    if (|fd100Fault_fd100_Pause=OFF) then
-//      // We're not paused
-//      if (&fd100StepTimePre_RECIRC_s10 >= 0) then
-//        // Step timer is enabled, so increment timer
-//        &fd100StepTimeAcc_s10 = &fd100StepTimeAcc_s10 + &lastScanTimeShort
-//      else
-//        // Step timer is disabled, so clear timer to zero
-//        &fd100StepTimeAcc_s10 = 0
-//        &fd100StepTimeAcc_m = 0
-//      endif
-//      if (&fd100TimePre_MembraneUse_s10  >= 0) then
-//        // Membrane-use timer is enabled, so increment timer
-//        &fd100TimeAcc_MembraneUse_s10 = &fd100TimeAcc_MembraneUse_s10 + &lastScanTimeShort
-//      else
-//        // Membrane-use timer is disabled, so clear timer to zero
-//        &fd100TimeAcc_MembraneUse_s10 = 0
-//        &fd100TimeAcc_MembraneUse_m = 0
-//      endif
-//    endif 
-//    
-//    |fd100_fd100Fault_enable1 = ON
-//    |fd100_DV06en1 = ON           // Energise If Fill Source is WATER  
-//    |fd100_IL01 = ON              // PB01 LED Light
-//    |fd100_IV08en1 = ON           // Energise If Fill Source is SITE and Level Low 
-//    |fd100_IV10en1 = ON           // Energise If Fill Source is WATER and Level Low 
-//    |fd100_IV15 = ON              // Seal Water
-//    |fd100_PP01 = ON              // Run Pump
-//    |fd100_DPC01pidEn1 = ON       // Along-membrane pressure drop control loop
-//    |fd100_PC01pidEn1 = ON        // Inlet Pressure Control Loop
-//    |fd100_PC03pid = ON           // Backwash Pressure Control Loop
-//    |fd100_PC05pidEn1 = ON        // Trans Membrane Pressure Control Loop
-//    |fd100Temperatureen1 = ON     // Cool or Heat As Selected 
-//    |fd100_fd101_recirc = ON      // Start Route Sequence
-//    |fd100_fd102_chemdoseEn1 = ON // Dose Chemical If CIP
 
   
     
@@ -1157,7 +1059,10 @@ select &tempStepNum
     &V1x_last = 0.0
     &R01_last = 1.0
     &R01 = 1.0
-  
+    if &LT01_100 <= LT01_MIN_DETECTABLE_LEVEL then
+      // Change feed tank status to empty
+      &fd100FeedTankState = fd100TankState_EMPTY
+    endif  
 
   case fd100StepNum_PUMP_TO_STORE: // Production or CIP Chemical Wash - Pump Feedtank To Store
     |fd100_DV05 = ON
@@ -1185,6 +1090,10 @@ select &tempStepNum
     &V1x_last = 0.0
     &R01_last = 1.0
     &R01 = 1.0
+    if &LT01_100 <= LT01_MIN_DETECTABLE_LEVEL then
+      // Change feed tank status to empty
+      &fd100FeedTankState = fd100TankState_EMPTY
+    endif  
 
 
   case fd100StepNum_DRAIN_STORE_TO_WASTE:

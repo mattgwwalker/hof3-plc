@@ -2,6 +2,8 @@
 //LT01 Data
 //** &USER_MEMORY_210 to &USER_MEMORY_224 currently allocated ** 
 
+CONST LT01_MIN_DETECTABLE_LEVEL = 300 // 3%
+
 REG &LT01SP01 = &USER_MEMORY_210 //Fill Feedtank Level
 MEM &LT01SP01 = 4000 //40%
 REG &LT01SP02 = &USER_MEMORY_211 //Fill Feedtank Hysteresis .. Start Fill @ SP01-SP02 .. Stop Fill @ SP01+SP02 

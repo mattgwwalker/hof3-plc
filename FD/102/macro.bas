@@ -81,8 +81,10 @@ IF (&tempStepNum != &fd102StepNum) THEN
   &fd102StepTimeAcc_m = 0
   select &tempStepNum
     case  fd102StepNum_RESET:
+      &fd102_DoseCount = 0
   
     case  fd102StepNum_DOSE_CHEM:
+      &fd102_DoseCount = &fd102_DoseCount + 1
   
     case  fd102StepNum_PURGE:
  
@@ -131,6 +133,7 @@ endif
 // **************
 // Fault checking
 // **************
+
 
 if &fd102_DoseCount >= &fd102_MaxDoseCount then
   // We've reached our maximum dose count
