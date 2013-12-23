@@ -16,7 +16,7 @@ REG &fd102StepTimeAcc_m = &USER_MEMORY_992
 MEM &fd102StepTimeAcc_m = 0
 
 REG &fd102StepTimePre_DOSE_CHEM_s10 = &USER_MEMORY_993
-MEM &fd102StepTimePre_DOSE_CHEM_s10 = 0
+MEM &fd102StepTimePre_DOSE_CHEM_s10 = 50
 REG &fd102StepTimePre_DOSE_CHEM_m = &USER_MEMORY_994
 MEM &fd102StepTimePre_DOSE_CHEM_m = 0
 
@@ -27,7 +27,7 @@ MEM &fd102StepTimePre_PURGE_m = 0
 
 // Length of time to wait before pH check is made
 REG &fd102StepTimePre_CHECK_PH_s10 = &USER_MEMORY_997
-MEM &fd102StepTimePre_CHECK_PH_s10 = 100 // 10 seconds
+MEM &fd102StepTimePre_CHECK_PH_s10 = 200 // 20 seconds
 REG &fd102StepTimePre_CHECK_PH_m = &USER_MEMORY_998
 MEM &fd102StepTimePre_CHECK_PH_m = 0
 
@@ -39,5 +39,5 @@ REG &fd102_DoseCount = &USER_MEMORY_1000
 MEM &fd102_DoseCount = 0
 
 REG &fd102_MaxDoseCount = &USER_MEMORY_1001
-MEM &fd102_MaxDoseCount = 1 // A default of one dose is allowed.
+MEM &fd102_MaxDoseCount = 0 // No dosing is allowed by default
 

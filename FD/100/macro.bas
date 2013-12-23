@@ -936,7 +936,7 @@ select &tempStepNum
     |fd100_PC01pidEn1 = ON     // HOF Filter Inlet Pressure Control Loop
     |fd100_PC05so = ON         // Open CV01 to enable recirc
     |fd100Temperatureen1 = ON  // Cool or Heat As Selected
-    |fd100_fd102_chemdoseEn1 = ON // Dose Chemical if CIP
+    |fd100_fd102_chemdoseEn1 = ON // Dose chemical if fill source is auto-chem 
 
 
   case fd100StepNum_RECIRC: //Production or CIP Chemical Wash - Recirc through filter
@@ -958,7 +958,7 @@ select &tempStepNum
     |fd100_PC05pidEn1 = ON        // Trans Membrane Pressure Control Loop
     |fd100Temperatureen1 = ON     // Cool or Heat As Selected 
     |fd100_fd101_recirc = ON      // Start Route Sequence
-    |fd100_fd102_chemdoseEn1 = ON // Dose Chemical If CIP
+    |fd100_fd102_chemdoseEn1 = ON // Dose chemical if fill source is auto-chem 
 
     // Check if it's time to blast the retentate line
     if &fd100StepTimeAcc_m >= &fd100StepTimePre_Recirc_BlastRetentate_m\
@@ -1229,8 +1229,9 @@ if (|fd100Fault_msg1 = ON) then
   ELSIF (&PH01_100 > &PH01SP02) THEN
     // pH is too high
     &OPmsg = 23                  
-  ELSIF (&DPT02_1000 > &DPT02SP01) THEN
-    // The across bag-filter pressure drop is too high
+  elsif &DPT02_FaultTimeAcc_m >= &DPT02_FaultTimePre_m \
+  and &DPT02_FaultTimeAcc_s10 >= &DPT02_FaultTimePre_s10 then
+    // The across bag-filter pressure drop has been too high for too long
     &OPmsg = 24                  
   elsif |fd100_fd100Fault_FILL = ON\
   and &fd100FillSource = fd100FillSource_STORAGE_TANK then
