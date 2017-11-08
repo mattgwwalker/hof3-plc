@@ -73,6 +73,6 @@ ENDIF
 
 // If the pump is off (either manually or automatically), set the raw speed
 // to zero
-if |PP01out = OFF
+if |PP01out = OFF then
   &PP01_RawSpeed = 0
 endif
