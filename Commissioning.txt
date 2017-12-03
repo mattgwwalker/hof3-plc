@@ -1,0 +1,157 @@
+HOF3 Commissioning
+==================
+
+Connect to the network with SSID 'PWCL_HOF3'.  The router has IP
+address 192.168.1.1.  The PLC has IP address 192.168.1.91.
+
+Run the batch file setroot.bat, this will produce HOF3.bas.  There is
+a separate readme file that discusses setroot.bat.
+
+Use the Texmate Development System (specifically version 3.8.9.23
+with the version of the compiler provided with this repository).
+compile HOF3.bas and open the port to the PLC.
+
+
+Communication with the PLC:
+---------------------------
+
+To command the PLC, Write to register 6010 (fd100cmd).  The values for
+each command can be found in FD/100/_USER_MEMORY.bas.
+
+When the PLC displays "Ready" on the LCD screen, it is waiting for a
+command.  For example, to send the feedtank to waste, set fd100cmd to
+the value 7.  The PLC will then display "Waiting" on the LCD screen to
+indicate that it has finished the command and is waiting for
+acknowledgement.  To acknowledge the end state, send the value 1 to
+fd100cmd.
+
+
+To confirm communication:
+-------------------------
+{FIX ME; this isn't valid for HOF3}
+- add User/UserVariables/TT01 to the watch window
+ - turn the watch on
+ - check that the value for TT01 from the PLC matches the value on the
+   LED screen.
+
+
+To modify the state of a valve:
+-------------------------------
+ - ensure that the plant is in the stopped state (fd100StepNumber == 0)
+   or in the "Manual Test Mode" state (set fd100StepNumber to 30)
+ - the cmd variable (for example, IV01cmd) sets the valve to one of three
+   states:
+     0 -> None (This causes no change in state.)
+     1 -> Auto
+     2 -> Manual Off
+     3 -> Manual On
+ - add the cmd variable to the watch window (find the variable under
+   User/UserVariables)
+ - turn the watch on
+ - double click on the variable in the watch window
+ - type the new value and press enter
+ 
+Note that the valves require air pressure to function, and the system
+DOES NOT check that there is sufficient, or even any, air pressure.
+Further, note that the valve may already be in the desired state.  To
+check that it is working change the state from off to on and then to
+auto.  If everything is working correctly, this should change the
+valve position and then return it back again to its original position.
+
+
+Check list of valves:
+---------------------
+
+
+
+
+
+Buttons and  Lights:
+--------------------
+
+
+
+
+
+Level Transmitters:
+-------------------
+
+
+
+
+
+
+Pumps:
+------
+
+
+To run a pump, there is both a run signal and a run speed.  The signal
+variable ends in 'cmd' (for example, 'PP01cmd') and the speed variable
+ends with an 'S' (for example, 'PP01S').
+
+The speed variable is a percentage multiplied by 100.  So to set the
+speed to 50%, set the variable to 50x100 = 5000.  The VSDs will ramp
+the pump speed slowly to ensure that the pumps are not shoked by a
+request to go from say 0% to 100%, or visa versa.
+
+For pump 1, the VSD ensure a safe minimum run speed for the pump, thus
+setting the speed to 0% does not stop the pump, but rather runs it as
+slowly as possible in a manner that can be maintained without over
+heating the pumps.  This is not the case for pump 2.
+
+To run and to stop the pump, use the command variable.  Set the
+command variable to one of three states:
+     0 -> None (This causes no change in state.)
+     1 -> Auto
+     2 -> Manual Off
+     3 -> Manual On
+
+Make sure there is liquid in the tank before starting the pump as the
+pumps do not appreciate being run dry.
+
+
+
+
+
+Flow meters:
+------------
+
+
+
+
+Pressure transmitters:
+----------------------
+
+
+
+Temperature transmitter:
+------------------------
+
+
+
+
+Commissioning notes:
+--------------------
+
+2017-11-09:
+
+Plant left off overnight only for the controller to display a range of
+error messages on boot in the morning.  "46 Err E", "43 Err E", "18
+Err E", and "6 Err E" were displayed.  See pages 201--205 of
+ICC402-REG-MAN for an explanation of the different errors.
+
+Talked to Roy from Define Instruments.  He recommended reinitialising
+the controller using the TDS (Erase Macro > Re-initialise) and reading
+and then writing EPROM values.  This included:
+* SmartModule/1/Setup/SMART_SETUP1 to clear error #43.
+* Serial/Port1/STRING_CHARACTER1 to clear error #46.
+
+It was also necessary to re-download the code into the controller.
+
+This resulted in a controller that once again started, however the
+analogue configuration will need to be re-done.
+
+
+2017-11-08:
+
+Rig first turned on since 2013.  No obvious problems.
