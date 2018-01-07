@@ -1,4 +1,5 @@
 //Analog Input Setup
+INCLUDE "{ROOT}\modules\ISOP1_8channel_4_20mA_generic.bas"
 INCLUDE "{ROOT}\modules\ISOP1_8channel_4_20mA_0001_ch01_ch08.bas"
 //INCLUDE "{ROOT}\modules\ISOP1_8channel_4_20mA_0003_ch01_ch08.bas"
 INCLUDE "{ROOT}\modules\ISQP1_4channel_4_20mA_0002_ch09_ch10.bas"

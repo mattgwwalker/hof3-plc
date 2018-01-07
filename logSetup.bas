@@ -32,4 +32,19 @@ MEM &LOG_REG30 = 0
 MEM &LOG_REG31 = 0
 MEM &LOG_REG32 = 0
 
+
+
+// Code 8 (Data Logging)
+// Source: Page 63 of ICC402-REG-MAN.pdf
+// First digit
+// 0: No data-logging
+// 1: Cyclic buffer
+// 2: Linear FIFO buffer
+// 3: Reset buffer number to zero
+// Second digit
+// 0: Printer format, no time stamp
+// 4: Spreadsheet format, no time stamp
+// 6: Spreadsheet format, time stamp day-mth-year hh:mm:ss
+// Third digit
+// 0: No trigger
 MEM &CODE8 = 160

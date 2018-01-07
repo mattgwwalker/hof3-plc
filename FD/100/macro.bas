@@ -378,7 +378,7 @@ select &tempStepNum
    IF (&PB01State=PB01Pressed) THEN
      // Log the start event
      &EventID = EventID_STARTED
-     force_log
+//     force_log
      &EventID = EventID_NONE
 
      // Move to END state to signal that the pushbutton has been pressed, 
@@ -669,14 +669,14 @@ IF (&tempStepNum != &fd100StepNum) THEN
     case fd100StepNum_END: //End wait for Acknowledgement from RPi  
       // Log the fact that we've finished whatever we were doing
       &EventID = EventID_FINISHED
-      force_log
+//      force_log
       &EventID = EventID_NONE   
   
 
     case fd100StepNum_FILL: //Production or CIP Chemical Wash - Fill Feedtank
       // Log the fact that filling's started
       &EventID = EventID_FILLING_STARTED
-      force_log
+//      force_log
       &EventID = EventID_NONE
    
       &PC05cv=&PC05cv01 //Open CV01 to enable recirc
@@ -729,7 +729,7 @@ IF (&tempStepNum != &fd100StepNum) THEN
     case fd100StepNum_MIX: //Production or CIP Chemical Wash - Mix Via Bypass Line
       // Log the fact that mixing's started
       &EventID = EventID_MIXING_STARTED
-      force_log
+//      force_log
       &EventID = EventID_NONE
 
       &DPC01cv=&DPC01cv01 // Set PC01sp to control the speed of the Main Feed Pump
@@ -739,7 +739,7 @@ IF (&tempStepNum != &fd100StepNum) THEN
     case fd100StepNum_RECIRC: //Production or CIP Chemical Wash - Recirc through filter
       // Log the fact that recirc's started
       &EventID = EventID_RECIRC_STARTED
-      force_log
+//      force_log
       &EventID = EventID_NONE
 
       // Set up the PID controllers for Recirc 
@@ -752,7 +752,7 @@ IF (&tempStepNum != &fd100StepNum) THEN
     case fd100StepNum_CONC: //Production - Concentrate
       // Log the fact that recirc's started
       &EventID = EventID_CONC_STARTED
-      force_log
+//      force_log
       &EventID = EventID_NONE
 
       &RC01cv           = &RC01cv01 //Concentration Ratio Starting Value
@@ -762,14 +762,14 @@ IF (&tempStepNum != &fd100StepNum) THEN
     case fd100StepNum_CONC_TILL_EMPTY: //Production - Empty Feedtank To Site
       // Log the fact that we've started emptying to site
       &EventID = EventID_MT2SITE_STARTED
-      force_log
+//      force_log
       &EventID = EventID_NONE
   
 
     case fd100StepNum_PUMP_TO_WASTE: //Production or CIP Chemical Wash - Pump Feedtank To Drain 
       // Log the fact that we've started pumping to drain
       &EventID = EventID_MT2WASTE_STARTED
-      force_log
+//      force_log
       &EventID = EventID_NONE
 
       &PC01cv=&PC01cv02
@@ -778,7 +778,7 @@ IF (&tempStepNum != &fd100StepNum) THEN
     case fd100StepNum_DRAIN_TO_WASTE: //Production or CIP Chemical Wash - Empty Feedtank To Drain
       // Log the fact that we've started passive draining
       &EventID = EventID_DRAIN2WASTE_STARTED
-      force_log
+//      force_log
       &EventID = EventID_NONE
 
 
@@ -786,7 +786,7 @@ IF (&tempStepNum != &fd100StepNum) THEN
     case fd100StepNum_PUMP_TO_STORE: //Production or CIP Chemical Wash - Pump Feedtank To Drain 
       // Log the fact that we've started passive draining
       &EventID = EventID_MT2STORE_STARTED
-      force_log
+//      force_log
       &EventID = EventID_NONE
 
       &PC01cv=&PC01cv02
@@ -847,7 +847,7 @@ IF (&tempStepNum != &fd100StepNum) THEN
     case fd100StepNum_DRAIN_TO_STORE: //Production or CIP Chemical Wash - Empty Feedtank To Drain
       // Log the fact that we've started passive draining
       &EventID = EventID_DRAIN2STORE_STARTED
-      force_log
+//      force_log
       &EventID = EventID_NONE
 
 
@@ -855,7 +855,7 @@ IF (&tempStepNum != &fd100StepNum) THEN
     case fd100StepNum_DRAIN_STORE_TO_WASTE:
       // Log the fact that we've started passive draining of the storage tank
       &EventID = EventID_DRAIN_STORE_TO_WASTE_STARTED
-      force_log
+//      force_log
       &EventID = EventID_NONE
 
       // Change feed tank status to empty

@@ -15,8 +15,22 @@ compile HOF3.bas and open the port to the PLC.
 Communication with the PLC:
 ---------------------------
 
+To test communication with the PLC, read the register CPU_LOADING.  As
+at 2017-12-13 it was at 61--62%.
+
 To command the PLC, Write to register 6010 (fd100cmd).  The values for
-each command can be found in FD/100/_USER_MEMORY.bas.
+each command can be found in FD/100/_USER_MEMORY.bas:
+
+CONST fd100cmd_NONE  = 0 // No Action
+CONST fd100cmd_ACK   = 1 // Acknowledge End State
+CONST fd100cmd_AWAIT_PUSH_BUTTON = 2 // Pushbutton Required
+CONST fd100cmd_STOP  = 3 // Stop
+CONST fd100cmd_RUN   = 4 // Mixing, recirculating, concentrating, and then concentrating to empty
+CONST fd100cmd_PAUSE = 5 // Pause ... i.e. simulate PB01 action
+CONST fd100cmd_ABORT = 6 // Abort current sequence
+CONST fd100cmd_WASTE = 7 // Send feed tank to waste
+CONST fd100cmd_STORE = 8 // Send feed tank to storage tank
+CONST fd100cmd_STORE_TO_WASTE = 9 // Storage tank to waste
 
 When the PLC displays "Ready" on the LCD screen, it is waiting for a
 command.  For example, to send the feedtank to waste, set fd100cmd to
@@ -38,11 +52,11 @@ To confirm communication:
 To modify the state of a valve:
 -------------------------------
  - ensure that the plant is in the stopped state (fd100StepNumber == 0)
-   or in the "Manual Test Mode" state (set fd100StepNumber to 30)
- - the cmd variable (for example, IV01cmd) sets the valve to one of three
+ - the cmd variable (for example, IV15cmd) sets the valve to one of three
    states:
      0 -> None (This causes no change in state.)
-     1 -> Auto
+     1 -> Auto Mode
+     2 -> Manual Mode
      2 -> Manual Off
      3 -> Manual On
  - add the cmd variable to the watch window (find the variable under
@@ -51,20 +65,38 @@ To modify the state of a valve:
  - double click on the variable in the watch window
  - type the new value and press enter
  
-Note that the valves require air pressure to function, and the system
-DOES NOT check that there is sufficient, or even any, air pressure.
-Further, note that the valve may already be in the desired state.  To
-check that it is working change the state from off to on and then to
-auto.  If everything is working correctly, this should change the
-valve position and then return it back again to its original position.
+Note that many of the valves require air pressure to function, and {is
+this turn of HOF3?} the system DOES NOT check that there is
+sufficient, or even any, air pressure.  Further, note that the valve
+may already be in the desired state.  To check that it is working
+change the state from manul mode, to manual off to manual on and then
+to auto mode.  If everything is working correctly, this should change
+the valve position and then return it back again to its original
+position.
 
 
 Check list of valves:
 ---------------------
 
+IV01 - Drain after pump PP01 (3:closed; 4:drain to storage tank)
+IV02 - labelled IV03
+IV03 - maybe swapped with IV02?  Not working
+IV04 - Drain of membrane's lower permeate out port  
+IV05 - Membrane isolation valve
+IV06 - Bypass isolation valve
+IV07 - Retenate out isolation
+IV08 - Product input isolation valve (3:closed; 4:open)
+IV09 - Chemical line isolation valve
+IV10 - Water input isolation valve (3:closed; 4:open)
+IV15 - Seal water isolation valve (3:closed; 4:open)
+IV16 - Storage tank drain isolation valve
 
-
-
+DV01 - Membrane flow direction valve #1
+DV02 - Membrane flow direction valve #2
+DV03 - Membrane flow direction valve #3
+DV04 - Permeate out/return divert valve
+DV05 - To storage tank/drain divert valve (3:waste; 4: storage tank) 
+DV06 - Water to waste/feed tank (3:waste; 4:feed tank)
 
 Buttons and  Lights:
 --------------------
@@ -84,10 +116,41 @@ Level Transmitters:
 Pumps:
 ------
 
+Warning: PP01 should only be run when the seal water is running
+(as isolated by IV15 and as detected by FS01).
 
 To run a pump, there is both a run signal and a run speed.  The signal
-variable ends in 'cmd' (for example, 'PP01cmd') and the speed variable
-ends with an 'S' (for example, 'PP01S').
+variable ends in 'cmd' (for example, 'PP01cmd').
+
+For PP01, the run speed is stored in the variable PP01_RawSpeed.  This
+is the variable that is converted to the 4--20mA signal.  This
+variable is primarily controlled by the PID controller PC01:
+PP01_RawSpeed is set to PC01cv inside the file PP01.bas.  PC01's
+process variable is PT01--the pressure after the pumped liquid has
+gone through the bag filter.  PC01's setpoint is controlled by the
+variable PC01spRampTarget, which is directly proportional to DPC01cv,
+another PID controller's output.  DPC01 controls the differential
+pressure along the membrane.
+
+Thus to control the speed of PP01, there are three options: either
+place PC01 in set output mode, or control DPC01 via set output mode,
+or control DPC01 by modifying its setpoint.
+
+To control the speed of PP01 by placing PC01 in "set output" mode:
+  1. Write the value 2 into PC01cmd to place it into "Manual" mode.
+  2. Write the value 3 into PC01cmd to place it into "Set Output" mode.
+  3. Write the desired pump speed (from 0 to 10,000, corresponding to
+     0% to 100%) into PC01cv, say 1000 for a speed of 10%.
+  4. Write the value 2 into PP01cmd to place the pump into "Manual".
+  5. Write the value 4 into PP01cmd to place the pump into "Run".
+  6. Write the value 3 into PP01cmd to place the pump into "Stop".
+  7. Write the value 1 into PP01cmd to place the pump into "Auto".
+  8. Write the value 1 into PC01cmd to place it into "Auto".
+
+
+
+
+
 
 The speed variable is a percentage multiplied by 100.  So to set the
 speed to 50%, set the variable to 50x100 = 5000.  The VSDs will ramp
@@ -132,6 +195,38 @@ Temperature transmitter:
 
 Commissioning notes:
 --------------------
+
+2018-01-07:
+
+PP01 runs.  Instructions added to this commissioning document to get
+pump to run manually.
+
+DV02 is leaking air when in state 4.  Manually forcing it to state 3
+stops the leaking.
+
+
+2017-12:
+
+The valves have been made to change state and all but a couple seem to
+be working fine.  Two air fittings had to be replaced as they were no
+longer reliably gripping their air hoses and under pressure the hoses
+would pop off.
+
+The analgue inputs are working again after a correction to the code
+regarding the SMART modules.  It appears that the SMART module for the
+analogue input module ISQP1 had been moved from the second the the
+third SMART port.
+
+The pump PP01 does not seem to be starting.
+
+
+2017-11:
+
+The controller was sent back to Define Instruments as Roy suspected a
+hardware fault when the controller once again started to error on
+boot.  This repair did not seem to resolve the issue as the errors
+continued to appear.  However, they have since stopped appearing.
+
 
 2017-11-09:
 

@@ -40,6 +40,7 @@ VV:
 
   // The interlocks are a way of quickly checking if that action is available.
   // So if the interlock for manual is on, you can select manual mode.
+  
   IF ((|VVmanEnable = ON) AND (|VVman = ON)) THEN
     |VVautoInterlock = ON
   ELSE
@@ -52,12 +53,16 @@ VV:
     |VVmanInterlock = OFF 
   ENDIF
 
+  // If the valve is currently in manual and on, then allow it to be manually
+  // turned off.
   IF ((|VVman = ON) AND (|VVout = ON)) THEN
     |VVmanOFFInterlock = ON
   ELSE
     |VVmanOFFInterlock = OFF 
   ENDIF
     
+  // If the valve is currently in manual and off, then allow it to be manually
+  // turned on.
   IF ((|VVman = ON) AND (|VVout = OFF)) THEN
     |VVmanONInterlock = ON
   ELSE
@@ -84,11 +89,13 @@ VV:
       ENDIF 
 
     CASE 3:
+      // If the valve is allowed to be turned off manually, turn it off.
       IF (|VVmanOFFInterlock = ON) THEN
         |VVout = OFF
       ENDIF
     
     CASE 4:
+      // If the valve is allowed to be turned on manually, turn it on.
       IF (|VVmanONInterlock = ON) THEN
         |VVout = ON
       ENDIF   

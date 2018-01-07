@@ -2,7 +2,7 @@
 // Log backwash event
 logBackwashEvent:
   &EventID = EventID_BACKWASH_STARTED
-  force_log
+//  force_log
   &EventID = EventID_NONE
   return
 
@@ -10,7 +10,7 @@ logBackwashEvent:
 // Log direction change event
 logDirectionChangeEvent:
   &EventID = EventID_DIRECTION_CHANGE_STARTED
-  force_log
+//  force_log
   &EventID = EventID_NONE
   return
 
@@ -18,7 +18,7 @@ logDirectionChangeEvent:
 // Log maximum backwash pressure
 logMaxBackwashPressure:
     &EventID = EventID_MAX_BACKWASH_PRESSURE
-    force_log
+//    force_log
     &EventID = EventID_NONE
   return
 
@@ -27,7 +27,7 @@ logMaxBackwashPressure:
 logDuringBackwashEvent:
   if &fd101_BW_LoggingEnabled != 0 then
     &EventID = EventID_DURING_BACKWASH
-    force_log
+//    force_log
     &EventID = EventID_NONE
   endif
   return
@@ -37,7 +37,7 @@ logDuringBackwashEvent:
 logDuringBackwashRetractEvent:
   if &fd101_BW_LoggingEnabled != 0 then
     &EventID = EventID_DURING_BACKWASH_RETRACT
-    force_log
+//    force_log
     &EventID = EventID_NONE
   endif
   return
