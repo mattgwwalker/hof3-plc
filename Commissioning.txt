@@ -15,8 +15,8 @@ compile HOF3.bas and open the port to the PLC.
 Communication with the PLC:
 ---------------------------
 
-To test communication with the PLC, read the register CPU_LOADING.  As
-at 2017-12-13 it was at 61--62%.
+To test communication with the PLC, read the register CPU_LOADING.
+(It was 61--62% as at 2017-12-13.)
 
 To command the PLC, Write to register 6010 (fd100cmd).  The values for
 each command can be found in FD/100/_USER_MEMORY.bas:
@@ -195,6 +195,16 @@ Temperature transmitter:
 
 Commissioning notes:
 --------------------
+
+2018-01-12:
+
+The air supply to IV01 came off under pressure.  Reduced air pressure
+to 6 bar (from ~8 bar).  
+
+Used PT01 to recalibrate channel 5 (PT01) and channel 7 (LT01).
+
+Used PH01 to recalibrate channel 9 (PH01).
+
 
 2018-01-07:
 
