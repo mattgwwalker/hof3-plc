@@ -52,3 +52,7 @@ if |FS01_I = OFF then
   endif
 endif
 
+
+// To disable FS01 for low pressure water supplies uncomment the following line
+// of code.  This forces FS01 to match PS01 (the water pressure sensor).
+|FS01_I = |PS01_I
