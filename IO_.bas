@@ -1,8 +1,10 @@
 //IO Mapping
+// The variables CI_1 to CI_10 are bits stored in register 4103 (see
+// page 88 of ICC402-REG-MAN.pdf).  
 BIT |ES01_I1 = |CI_1    //OK when ES01 ON=OK OFF=NotOK
 BIT |PB01_I = |CI_2     //OK Pushbutton
 BIT |PS01_I = |CI_3     //OK Water Pressure ON=OK OFF= No Water
-BIT |PS02_I = |CI_4     //OK High Presuure Air ON=OK OFF=No Air
+BIT |PS02_I = |CI_4     //OK High Pressure Air ON=OK OFF=No Air
 BIT |PS03_I = |CI_5     //OK Low Presuure Air ON=OK OFF=No Air
 BIT |FS01_I_Raw = |CI_6 //OK Seal Water Flow switch
 BIT |PP01E_I = |CI_7    //OK - PP01 Run
