@@ -2,7 +2,10 @@
 //LT01 Data
 //** &USER_MEMORY_210 to &USER_MEMORY_224 currently allocated ** 
 
-CONST LT01_MIN_DETECTABLE_LEVEL = 300 // 3%
+CONST LT01_MIN_RELIABLE_LEVEL = 400 // 4%  Warning: display code converts this
+                                    //              to an integer during compilation
+                                    //              so will not accurately display
+                                    //              anything below decimal point 
 
 REG &LT01SP01 = &USER_MEMORY_210 //Fill Feedtank Level
 MEM &LT01SP01 = 4000 //40%

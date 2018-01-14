@@ -1071,7 +1071,7 @@ select &tempStepNum
     &V1x_last = 0.0
     &R01_last = 1.0
     &R01 = 1.0
-    if &LT01_100 <= LT01_MIN_DETECTABLE_LEVEL then
+    if &LT01_100 <= LT01_MIN_RELIABLE_LEVEL then
       // Change feed tank status to empty
       &fd100FeedTankState = fd100TankState_EMPTY
     endif  
@@ -1102,7 +1102,7 @@ select &tempStepNum
     &V1x_last = 0.0
     &R01_last = 1.0
     &R01 = 1.0
-    if &LT01_100 <= LT01_MIN_DETECTABLE_LEVEL then
+    if &LT01_100 <= LT01_MIN_RELIABLE_LEVEL then
       // Change feed tank status to empty
       &fd100FeedTankState = fd100TankState_EMPTY
     endif  

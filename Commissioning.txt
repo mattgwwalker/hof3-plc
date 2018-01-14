@@ -196,6 +196,15 @@ Temperature transmitter:
 Commissioning notes:
 --------------------
 
+2018-01-14:
+
+Draining via web-interface is now working.
+
+When the feedtank is empty, LT01 is measuring over the original 3%
+threshold.  Changed threshold for reliable measurement to 4% (from
+3%).
+
+
 2018-01-12:
 
 The air supply to IV01 came off under pressure.  Reduced air pressure

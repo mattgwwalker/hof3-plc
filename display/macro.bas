@@ -97,7 +97,7 @@ select &tempStepNum
    &DATA_SOURCE_DISPLAY2 = ADDR(&Display_2DP)
 
   case  5: // LT01
-   IF &LT01_100 > LT01_MIN_DETECTABLE_LEVEL THEN
+   IF &LT01_100 > LT01_MIN_RELIABLE_LEVEL THEN
      WRITE 1 ""
      WRITE 1 "LT01 (%)"
      &Display_2DP = &LT01_100
@@ -105,7 +105,8 @@ select &tempStepNum
    ELSE
      &DATA_SOURCE_DISPLAY1 = 0
      WRITE 2 ""
-     WRITE 2 "LT01 is below 3%"
+            //1234567890123456
+     WRITE 2 "LT01 below "+LT01_MIN_RELIABLE_LEVEL/100+"%"
    ENDIF
 
   case  6: // TT01
