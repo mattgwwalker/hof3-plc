@@ -204,6 +204,15 @@ When the feedtank is empty, LT01 is measuring over the original 3%
 threshold.  Changed threshold for reliable measurement to 4% (from
 3%).
 
+Tested filling with water, mixing, and heating during mixing using the
+production page.
+
+Tested push button to pause and unpause plant during mixing.
+
+Tested cooling using both CP01 and CP02.
+
+Tested along-membrane pressure control (DPC01).
+
 
 2018-01-12:
 
